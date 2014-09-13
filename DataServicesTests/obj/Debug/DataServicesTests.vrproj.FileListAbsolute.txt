@@ -1,0 +1,10 @@
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\DataServicesTests.dll
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\obj\Debug\DataServicesTests.vrprojResolveAssemblyReference.cache
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\DataServicesTests.pdb
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\obj\Debug\DataServicesTests.dll
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\obj\Debug\DataServicesTests.pdb
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ASNA.Helpers.DataServices.dll
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.dll
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ASNA.Helpers.DataServices.pdb
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.pdb
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.xml

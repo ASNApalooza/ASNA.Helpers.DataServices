@@ -1,0 +1,317 @@
+﻿Using System
+Using System.Collections
+Using System.Collections.Generic
+Using System.Text
+Using System.Text.RegularExpressions
+Using System.Data 
+Using System.Diagnostics
+Using System.IO 
+using ASNA.DataGate.Client
+using ASNA.DataGate.Common
+Using ASNA.DataGate.DataLink
+Using ASNA.DataGate.Providers
+Using System.ComponentModel
+Using NewtonSoft.Json
+
+DclNameSpace ASNA.Helpers.DataServices
+
+BegClass DataList Access(*Public) 
+    DclFld DGDB     Type(AdgConnection) 
+    DclFld DGFile   Type(FileAdapter)     
+    DclFld DGDS     Type(AdgDataSet)
+    DclFld Library  Type(*String) 
+    DclFld File     Type(*String) 
+    DclFld Rows     Type(*Integer4)
+
+    DclArray Fields Type(*String) Rank(1) Access(*Private)
+    
+    DclFld FileKeys Type(List(*Of FileKey)) Access(*Private) New()
+    DclFld DGDB  Type(AdgConnection) Access(*Private)   
+    
+    DclFld _ListDataTable Type(DataTable) 
+    BegProp ListDataTable Type(DataTable) Access(*Public) 
+        BegGet 
+            LeaveSr *This._ListDataTable
+        EndGet 
+    EndProp 
+
+    DclFld _Query Type(*String) 
+    BegProp Query Type(*String) Access(*Public)
+        BegSet
+            *This._Query = *PropVal 
+        EndSet
+        BegGet
+            LeaveSR *This._Query 
+        EndGet
+    EndProp 
+
+    DclFld GenerateJsonDataList Type(*Boolean) Inz(*True) Access(*Public)
+    DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
+    DclFld Milliseconds         Type(*Integer4) Access(*Public)
+    DclFld StartingKeys         Type(List(*Of FileKey)) Access(*Public) New()
+    DclFld EndingKeys           Type(List(*Of FileKey)) Access(*Public) New()  
+    
+    BegConstructor  Access(*Public) 
+        DclSrParm DGDB           Type(AdgConnection)
+        DclSrParm Library        Type(*String) 
+        DclSrParm File           Type(*String) 
+        DclSrParm Fields         Type(*String) 
+        DclSrParm Rows           Type(*String)
+        
+        *This.DGDB = DGDB
+        *This.Library = Library
+        *This.File = File
+        *This.Fields = Regex.Split(Fields.Trim(), "\s*,\s*") 
+        *This.Rows = Convert.ToInt32(Rows)       
+    EndConstructor 
+ 
+    BegFunc OpenForDataSetForRead Access(*Private) Type(*Boolean) 
+        DGFile = *New FileAdapter(DGDB,String.Format("{0}/{1}",Library.Trim(),File.Trim()))
+        DGFile.OpenAttributes.BlockingFactor = FileOpenAttr.OptimalBlockingFactor
+        DGFile.AccessMode = AccessMode.Read
+        LeaveSr *True 
+    EndFunc   
+
+    BegFunc GetKeyTable Type(AdgKeyTable) 
+        DclSrParm DGFile Type(FileAdapter) 
+
+        DclFld FormatName Type(*String) 
+        DclFld Result Type(AdgKeyTable) 
+        
+        FormatName = DGFile.GetFormatName(0)      
+        Result = DGDS.NewKeyTable(FormatName) 
+        
+        LeaveSr Result         
+    EndFunc 
+    
+    BegSr AddKey Access(*Public) 
+        DclSrParm KeyField  Type(*String) 
+        DclSrParm KeyValue Type(*Object) 
+        
+        FileKeys.Add(*New FileKey(KeyField, KeyValue))       
+    EndSr
+       
+    BegFunc GetRowsAsDataTable Access(*Public) Type(DataTable) 
+        DclSrParm RecordsToRead Type(*Integer4) 
+       
+        *This.OpenForDataSetForRead()       
+        ReadRows(RecordsToRead) 
+
+        DGFile.Close()
+
+        LeaveSr DGDS.Tables[0]
+    EndFunc 
+
+    BegSr ReadRows
+        DclSrParm RecordsToRead Type(*Integer4) 
+
+        DclFld EOF           Type(*Boolean)
+        DclFld QueryMask     Type(StringBuilder) New()
+        DclFld Query         Type(*String) 
+        
+        DclArray Keys        Type(*String) Rank(1)
+        DclArray Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1)
+
+        QueryMask.Append(CheckQueryArgs(*This.Query.ToUpper())) 
+        CreateQueryDefinition(QueryMask)                 
+        SetCorrectAndOrInQuery(QueryMask)
+        PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage)
+        
+        Query = QueryMask.ToString() 
+
+        DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
+        Do FromVal(1) ToVal(RecordsToRead) 
+            EOF = ReadNextRecord(DGFile)
+            If (EOF) 
+                Leave
+            EndIf
+        EndDo 
+    EndSr
+
+    BegFunc ReadNextRecord Type(*Boolean) 
+        DclSrParm DGFile Type(FileAdapter) 
+        
+        Try
+            DGFile.ReadSequential(DGDS, ReadSequentialMode.Next, LockRequest.Read)
+            LeaveSr *False 
+        Catch DgEx Type(dgException) 
+            If (DgEx.Error = dgErrorNumber.dgEaEOF)
+                LeaveSr *True 
+            Else
+                Throw DgEx           
+            EndIf
+        EndTry    
+    EndFunc     
+
+    BegFunc CheckQueryArgs Type(*String) 
+        DclSrParm Query Type(*String) 
+
+        DclFld Result Type(*String) 
+
+        // Ensure that replacement query args are in the format
+        // {arg} with not spaces inside the braces.
+        Result = Regex.Replace(Query,"{\s*", "{")
+        Result = Regex.Replace(Result,"\s*}", "}")
+
+        LeaveSr Result 
+    EndFunc 
+
+    BegSr CreateQueryDefinition
+        DclSrParm QueryMask Type(StringBuilder) 
+
+        DclFld KeyField  Type(*String)
+        DclFld KeyValue  Type(*String)
+        DclFld i         Type(*Integer4)
+        
+        // Create query for OpenQueryFile.    
+        Do FromVal(0) ToVal(FileKeys.Count - 1) Index(i)
+            KeyValue = String.Format("{0}", FileKeys[i].FieldValue.ToString()) 
+            KeyField = String.Format("{{{0}}}",FileKeys[i].FieldName)
+            QueryMask.Replace( KeyField,KeyValue) 
+        EndDo
+    EndSr
+
+    BegSr PopulateDGKeysAndUsage
+        DclSrParm Keys   Type(*String) Rank(1) By(*Reference)
+        DclSrParm Usage Type(ASNA.DataGate.Common.KeyUsages) Rank(1) By(*Reference) 
+
+        DclFld i Type(*Integer4)
+
+        Keys = *New String[*This.FileKeys.Count] 
+        Usage = *New KeyUsages[*This.FileKeys.Count] 
+        Do FromVal(0) ToVal(*This.FileKeys.Count - 1) Index(i)
+            keys[i] = *This.FileKeys[i].FieldName
+            Usage[i] = KeyUsages.ASCEND
+        EndDo     
+    EndSr
+
+    BegSr SetCorrectAndOrInQuery
+        DclSrParm QueryMask Type(StringBuilder) 
+
+        If (DGDB.SourceProfile.Label.Trim() = "DB2" OR DGDB.SourceProfile.Label.Trim() = "IBM i")  
+            // Non-IBM i platforms don't want the asterisk with the AND/OR operations.
+            // This code assumes the database name label property isn't "DB2" for non-IBM i databases.
+            QueryMask.Replace(" AND "," *AND ") 
+            QueryMask.Replace(" OR "," *OR ") 
+        EndIf 
+    EndSr 
+
+    BegFunc FixApostrophe Type(*String)
+        DclSrParm FieldValue Type(*String)
+        // OpenQueryFile chokes with embedded single apostrophes. This function
+        // swaps any single occurrence of an apostrophe for two apostrophes to solve
+        // that problem. Note that this is only changing the argument used OpenQueryFile--
+        // the underlying data is kept intact.
+
+        DclFld SINGLE_APOSTROPHE Type( *String ) Inz( "'" )
+        DclFld DOUBLE_APOSTROPHE Type( *String ) Inz( "''" )
+        
+        LeaveSr FieldValue.Replace(SINGLE_APOSTROPHE, DOUBLE_APOSTROPHE)         
+    EndFunc
+
+    BegFunc GetFieldNameTokens Type(*String) Rank(1)
+        DclSrParm FieldName Type(*String) 
+
+        DclArray tokens    Type(*String) Rank(1) 
+
+        DclArray tokens Type(*String) Rank(1) 
+
+        If (FieldName.Contains(":")) 
+            tokens = Regex.Split(FieldName.Trim(), "\s*:\s*")             
+        Else
+            tokens = *New *String[2]
+            tokens[0] = FieldName
+            tokens[1] = FieldName
+        EndIf
+
+        LeaveSr tokens
+    EndFunc
+
+    BegFunc GetListAsJson Type(*String) Access(*Public)
+        DclFld Json      Type(*String)
+
+        DclFld dt                   Type(DataTable)
+        DclFld timer                Type(StopWatch) New()
+        DclFld sb                   Type(StringBuilder) New()
+        DclFLd sw                   Type(StringWriter) New(sb)
+        DclFld writer               Type(JsonWriter)
+
+        DclFld RealFieldName        Type(*String)
+        DclFld FieldNameOUtputAlias Type(*String)
+        DclArray FieldNameTokens    Type(*String) Rank(1) 
+
+        timer.Start()
+
+        writer = *New JsonTextWriter(sw)
+        writer.Formatting = Formatting.Indented
+        writer.WriteStartObject()
+        writer.WritePropertyName("resultRowCount")
+        writer.WriteValue(*This.Rows)
+
+        dt = *This.GetRowsAsDataTable(*This.Rows) 
+        *This._ListDataTable = dt
+        *This.ResultRowCount = dt.Rows.Count
+        
+        If (*This.GenerateJsonDataList) 
+            writer.WritePropertyName("list")
+            writer.WriteStartArray()      
+            ForEach dr Type(DataRow) Collection(dt.Rows)
+                writer.WriteStartObject()
+                ForEach field Type(*String) Collection(*This.Fields) 
+                    FieldNameTokens = GetFieldNameTokens(field) 
+                    RealFieldName = FieldNameTokens[0]
+                    FieldNameOutputAlias = FieldNameTokens[1]
+                    writer.WritePropertyName(FieldNameOutputAlias)
+                    writer.WriteValue(dr[RealFieldName].ToString().Trim()) 
+                EndFor
+                writer.WriteEndObject()
+            EndFor 
+            writer.WriteEndArray()
+        EndIf 
+
+        AddBeginningAndEndKeys(writer *As JsonTextWriter, dt)    
+
+        timer.Stop()
+        *This.Milliseconds = timer.ElapsedMilliseconds
+        writer.WritePropertyName("milliseconds")
+        writer.WriteValue(timer.ElapsedMilliseconds.ToString("#,##0")) 
+
+
+        writer.Close()
+        Json = sb.ToString() 
+
+        LeaveSr Json
+    EndFunc 
+
+    BegSr AddBeginningAndEndKeys
+        DclSrParm writer           Type(JsonTextWriter)
+        DclSrParm dt               Type(DataTable)
+        DclFld dr                  Type(DataRow)         
+
+        writer.WritePropertyName("startingKey")
+        writer.WriteStartArray()      
+        dr = dt.Rows[0]         
+        ForEach key Type(FileKey) Collection(FileKeys)
+            writer.WriteStartObject()
+            writer.WritePropertyName(key.FieldName)
+            writer.WriteValue(dr[key.FieldName].ToString().Trim()) 
+            writer.WriteEndObject() 
+            *This.StartingKeys.Add(*New FileKey(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+        EndFor
+        writer.WriteEndArray()
+                
+        writer.WritePropertyName("endingKey")
+        writer.WriteStartArray()      
+        dr = dt.Rows[dt.Rows.Count-1] 
+        ForEach key Type(FileKey) Collection(FileKeys)
+            writer.WriteStartObject()
+            writer.WritePropertyName(key.FieldName)
+            writer.WriteValue(dr[key.FieldName].ToString().Trim()) 
+            writer.WriteEndObject() 
+            *This.EndingKeys.Add(*New FileKey(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+        EndFor
+        
+        writer.WriteEndArray()
+    EndSr
+
+EndClass

@@ -1,0 +1,71 @@
+﻿Using System
+Using System.Text
+Using System.Collections.Generic
+Using Microsoft.VisualStudio.TestTools.UnitTesting
+Using System.IO 
+
+// Set reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework
+
+// DclNamespace DataServicesTests
+
+// Project template location:
+// "C:\Users\Roger\Documents\Visual Studio 2012\My Exported Templates\AVR unit test project.zip"
+
+BegClass Tests Access(*Public) Attributes(TestClass())
+
+    DclDb pgmDB DBName("*Public/DG Net Local") 
+
+    BegSr TestDataServiceCustomers Attributes(TestMethod()) Access(*Public)
+        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
+        DclFld jsonList Type(ASNA.Helpers.DataServices.DataList)
+        DclFld json     Type(*String)
+
+        Parms.Add("library","Examples")
+        Parms.Add("file","CMastNewL2")
+        Parms.Add("fields","CMCUSTNO:label,CMNAME:text,CMADDR1,CMCITY,CMState,CMPostCode")
+        Parms.Add("rows","12")
+
+        Connect pgmDB 
+
+        jsonList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,Parms["library"],parms["file"],parms["fields"],parms["rows"])
+        jsonList.AddKey("CMNAME","Smi")
+        jsonList.AddKey("CMCUSTNO","30000")
+        jsonList.Query = "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}" 
+
+        jsonList.GenerateJsonDataList = *False
+        
+        json = jsonList.GetListAsJson()
+
+        File.WriteAllText("c:\users\roger\documents\customers.json",json)
+
+        Assert.AreEqual(jsonList.ResultRowCount,Convert.ToInt32(12))
+    EndSr 
+
+    BegSr TestDataServiceCount Attributes(TestMethod()) Access(*Public)
+        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
+        DclFld jsonList Type(ASNA.Helpers.DataServices.DataList)
+        DclFld json     Type(*String)
+
+        Parms.Add("library","Devo")
+        Parms.Add("file","County")
+        Parms.Add("fields","COUNTY,STATE")
+        Parms.Add("rows","12")
+
+        Connect pgmDB 
+
+        jsonList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,Parms["library"],parms["file"],parms["fields"],parms["rows"])
+        jsonList.AddKey("STATE","TX")
+        jsonList.AddKey("COUNTY","B")
+        jsonList.Query = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
+
+        json = jsonList.GetListAsJson()
+
+        File.WriteAllText("c:\users\roger\documents\counties.json",json)
+
+        Assert.AreEqual(jsonList.ResultRowCount,Convert.ToInt32(12))
+    EndSr 
+
+
+
+
+EndClass

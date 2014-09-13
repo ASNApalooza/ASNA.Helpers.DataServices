@@ -1,0 +1,32 @@
+﻿
+BegClass FileKey 
+    DclFld _FieldName Type( *String )
+    BegProp FieldName Type( *String )  Access( *Public )
+        BegGet
+            LeaveSr Value( _FieldName )
+        EndGet
+    
+        BegSet
+            _FieldName = *PropVal
+        EndSet
+    EndProp
+    
+    DclFld _FieldValue Type( *Object )
+    BegProp FieldValue Type( *Object )  Access( *Public )
+        BegGet
+            LeaveSr Value( _FieldValue )
+        EndGet
+    
+        BegSet
+            _FieldValue = *PropVal
+        EndSet
+    EndProp
+    
+    BegConstructor Access( *Public ) 
+        DclSrParm FieldName  Type( *String ) 
+        DclSrParm FieldValue Type( *Object ) 
+        
+        *This.FieldName = FieldName
+        *This.FieldValue = FieldValue  
+    EndConstructor 
+EndClass

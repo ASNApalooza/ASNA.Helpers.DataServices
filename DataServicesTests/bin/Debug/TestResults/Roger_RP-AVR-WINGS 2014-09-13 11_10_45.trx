@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestRun id="533e190a-77a3-45bb-a5e3-189b8c432993" name="Roger@RP-AVR-WINGS 2014-09-13 11:10:45" runUser="ASNAUS\Roger" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Default Test Settings" id="db050e54-1103-464e-9214-f3340896a230">
+    <Execution>
+      <TestTypeSpecific />
+      <AgentRule name="Execution Agents">
+      </AgentRule>
+    </Execution>
+    <Deployment runDeploymentRoot="Roger_RP-AVR-WINGS 2014-09-13 11_10_45" />
+  </TestSettings>
+  <Times creation="2014-09-13T11:10:45.6181768-05:00" queuing="2014-09-13T11:10:46.6483765-05:00" start="2014-09-13T11:10:46.7223724-05:00" finish="2014-09-13T11:10:51.0075460-05:00" />
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" error="0" failed="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+  </ResultSummary>
+  <TestDefinitions>
+    <UnitTest name="TestDataServiceCustomers" storage="dataservicestests.dll" id="48878c87-d0c0-f69a-ea69-d9d2d7012922">
+      <Execution id="e302875d-b6e4-4e1f-952b-f2605e268f11" />
+      <TestMethod codeBase="C:/rpDocuments/Programming/AVR/Other/ASNA.Helpers.DataServices/DataServicesTests/bin/Debug/dataservicestests.dll" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="DataServicesTests.Tests, DataServicesTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="TestDataServiceCustomers" />
+    </UnitTest>
+    <UnitTest name="Roger" storage="dataservicestests.dll" id="130cc3e5-f0bf-edee-d584-e663eaba2afa">
+      <Execution id="b4b92d61-544b-4925-a1ab-eef597383c63" />
+      <TestMethod codeBase="C:/rpDocuments/Programming/AVR/Other/ASNA.Helpers.DataServices/DataServicesTests/bin/Debug/dataservicestests.dll" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="DataServicesTests.Tests, DataServicesTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="Roger" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <TestEntries>
+    <TestEntry testId="130cc3e5-f0bf-edee-d584-e663eaba2afa" executionId="b4b92d61-544b-4925-a1ab-eef597383c63" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="48878c87-d0c0-f69a-ea69-d9d2d7012922" executionId="e302875d-b6e4-4e1f-952b-f2605e268f11" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <Results>
+    <UnitTestResult executionId="b4b92d61-544b-4925-a1ab-eef597383c63" testId="130cc3e5-f0bf-edee-d584-e663eaba2afa" testName="Roger" computerName="RP-AVR-WINGS" duration="00:00:00.1245458" startTime="2014-09-13T11:10:46.8343735-05:00" endTime="2014-09-13T11:10:47.2504499-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4b92d61-544b-4925-a1ab-eef597383c63">
+    </UnitTestResult>
+    <UnitTestResult executionId="e302875d-b6e4-4e1f-952b-f2605e268f11" testId="48878c87-d0c0-f69a-ea69-d9d2d7012922" testName="TestDataServiceCustomers" computerName="RP-AVR-WINGS" duration="00:00:03.7055183" startTime="2014-09-13T11:10:47.2564509-05:00" endTime="2014-09-13T11:10:50.9645477-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e302875d-b6e4-4e1f-952b-f2605e268f11">
+    </UnitTestResult>
+  </Results>
+</TestRun>
