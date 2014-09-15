@@ -3,6 +3,7 @@ Using System.Text
 Using System.Collections.Generic
 Using Microsoft.VisualStudio.TestTools.UnitTesting
 Using System.IO 
+Using ASNA.DataGate.Client
 
 // Set reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework
 
@@ -17,8 +18,10 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
     BegSr TestDataServiceCustomers Attributes(TestMethod()) Access(*Public)
         DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
-        DclFld jsonList Type(ASNA.Helpers.DataServices.DataList)
+        DclFld DGList   Type(ASNA.Helpers.DataServices.DataList)
         DclFld json     Type(*String)
+        DclFld Result   Type(*Boolean) 
+        DclFld Rows     Type(*Integer4)
 
         Parms.Add("library","Examples")
         Parms.Add("file","CMastNewL2")
@@ -27,42 +30,67 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         Connect pgmDB 
 
-        jsonList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,Parms["library"],parms["file"],parms["fields"],parms["rows"])
-        jsonList.AddKey("CMNAME","Smi")
-        jsonList.AddKey("CMCUSTNO","30000")
-        jsonList.Query = "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}" 
+        Rows = Convert.ToInt32(Parms["rows"])
+        DGList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,Parms["library"],parms["file"],parms["fields"],Rows)
+        DGList.AddKey("CMNAME","Smi")
+        DGList.AddKey("CMCUSTNO","30000")
+        DGList.Query = "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}" 
+       
+        Result = DGList.GetList()
+        Assert.IsTrue(Result)  
+        If (Result) 
+            // Success.
+        Else 
+            // An error occurred.
+        EndIf
 
-        jsonList.GenerateJsonDataList = *False
-        
-        json = jsonList.GetListAsJson()
+        Disconnect pgmDB
+
+        json = DGList.ListAsJson
 
         File.WriteAllText("c:\users\roger\documents\customers.json",json)
 
-        Assert.AreEqual(jsonList.ResultRowCount,Convert.ToInt32(12))
+        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
     EndSr 
 
-    BegSr TestDataServiceCount Attributes(TestMethod()) Access(*Public)
+    BegSr TestDataServiceCounty Attributes(TestMethod()) Access(*Public)
         DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
-        DclFld jsonList Type(ASNA.Helpers.DataServices.DataList)
+        DclFld DGList   Type(ASNA.Helpers.DataServices.DataList)
         DclFld json     Type(*String)
+        DclFld Result   Type(*Boolean)
+        DclFld Rows     Type(*Integer4) 
 
         Parms.Add("library","Devo")
         Parms.Add("file","County")
         Parms.Add("fields","COUNTY,STATE")
-        Parms.Add("rows","12")
+        Parms.Add("rows","-1")
 
-        Connect pgmDB 
+        DclFld db Type(AdgConnection) New("*Public/DG Net Local") 
 
-        jsonList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,Parms["library"],parms["file"],parms["fields"],parms["rows"])
-        jsonList.AddKey("STATE","TX")
-        jsonList.AddKey("COUNTY","B")
-        jsonList.Query = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
+        db.Open()
 
-        json = jsonList.GetListAsJson()
+        Rows = Convert.ToInt32(Parms["rows"]) 
+        DGList = *New ASNA.Helpers.DataServices.DataList(db,Parms["library"],parms["file"],parms["fields"],Rows)
+        DGList.AddKey("STATE","TX")
+        DGList.AddKey("COUNTY","A")
+        DGList.Query = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
+        DGList.IndentJson = *True
+
+        Result = DGList.GetList()
+        Assert.IsTrue(Result)  
+        If (Result) 
+            // Success.
+        Else 
+            // An error occurred.
+        EndIf
+
+        db.Close()
+
+        json = DGList.ListAsJson
 
         File.WriteAllText("c:\users\roger\documents\counties.json",json)
 
-        Assert.AreEqual(jsonList.ResultRowCount,Convert.ToInt32(12))
+        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(254))
     EndSr 
 
 

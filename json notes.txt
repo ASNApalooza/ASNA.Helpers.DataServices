@@ -1,0 +1,9 @@
+{
+    "library": "examples"
+    "file": "CMASTNEWL2"
+    "fields": "CMNAME, CMCUSTNO"
+    "rows" 16,
+    "keys" [{"CMNAME": "Smi"},
+            {"CMCUSTNO":30000}],
+    "query": "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}"
+}

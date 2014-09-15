@@ -28,22 +28,40 @@ BegClass DataList Access(*Public)
     DclFld FileKeys Type(List(*Of FileKey)) Access(*Private) New()
     DclFld DGDB  Type(AdgConnection) Access(*Private)   
     
-    DclFld _ListDataTable Type(DataTable) 
-    BegProp ListDataTable Type(DataTable) Access(*Public) 
-        BegGet 
-            LeaveSr *This._ListDataTable
-        EndGet 
-    EndProp 
+    DclFld _ErrorException Type(System.Exception) 
+    BegProp ErrorException Type(System.Exception) Access(*Public)
+        BegGet
+            LeaveSr _ErrorException
+        EndGet
+    EndProp
+
+    DclFld _IndentJson Type(*Boolean)
+    BegProp IndentJson Type(*Boolean) Access(*Public) 
+        BegSet
+            _IndentJson = *PropVal
+        EndSet
+    EndProp
 
     DclFld _Query Type(*String) 
     BegProp Query Type(*String) Access(*Public)
         BegSet
             *This._Query = *PropVal 
         EndSet
-        BegGet
-            LeaveSR *This._Query 
-        EndGet
     EndProp 
+
+    DclFld _ListAsDataTable Type(DataTable) 
+    BegProp ListAsDataTable Type(DataTable) Access(*Public) 
+        BegGet 
+            LeaveSr *This._ListAsDataTable
+        EndGet 
+    EndProp 
+
+    DclFld _ListAsJson Type(*String)
+    BegProp ListAsJson Type(*String) Access(*Public)
+        BegGet
+            LeaveSr *This._ListAsJson
+        EndGet
+    EndProp
 
     DclFld GenerateJsonDataList Type(*Boolean) Inz(*True) Access(*Public)
     DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
@@ -56,13 +74,13 @@ BegClass DataList Access(*Public)
         DclSrParm Library        Type(*String) 
         DclSrParm File           Type(*String) 
         DclSrParm Fields         Type(*String) 
-        DclSrParm Rows           Type(*String)
+        DclSrParm Rows           Type(*Integer4)
         
         *This.DGDB = DGDB
         *This.Library = Library
         *This.File = File
         *This.Fields = Regex.Split(Fields.Trim(), "\s*,\s*") 
-        *This.Rows = Convert.ToInt32(Rows)       
+        *This.Rows = Rows
     EndConstructor 
  
     BegFunc OpenForDataSetForRead Access(*Private) Type(*Boolean) 
@@ -108,24 +126,36 @@ BegClass DataList Access(*Public)
         DclFld EOF           Type(*Boolean)
         DclFld QueryMask     Type(StringBuilder) New()
         DclFld Query         Type(*String) 
+        DclFld Counter       Type(*Integer4)
         
         DclArray Keys        Type(*String) Rank(1)
         DclArray Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1)
 
-        QueryMask.Append(CheckQueryArgs(*This.Query.ToUpper())) 
+        QueryMask.Append(CheckQueryArgs(*This._Query.ToUpper())) 
         CreateQueryDefinition(QueryMask)                 
         SetCorrectAndOrInQuery(QueryMask)
         PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage)
         
         Query = QueryMask.ToString() 
 
+        EOF = *False    
+        Counter = 0 
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
-        Do FromVal(1) ToVal(RecordsToRead) 
-            EOF = ReadNextRecord(DGFile)
-            If (EOF) 
+        DoWhile NOT ReadNextRecord(DGFile)
+            Counter += 1 
+            If (Counter = RecordsToRead)
                 Leave
             EndIf
         EndDo 
+
+
+//        DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
+//        Do FromVal(1) ToVal(RecordsToRead) 
+//            EOF = ReadNextRecord(DGFile)
+//            If (EOF) 
+//                Leave
+//            EndIf
+//        EndDo 
     EndSr
 
     BegFunc ReadNextRecord Type(*Boolean) 
@@ -227,9 +257,8 @@ BegClass DataList Access(*Public)
         LeaveSr tokens
     EndFunc
 
-    BegFunc GetListAsJson Type(*String) Access(*Public)
-        DclFld Json      Type(*String)
-
+    BegFunc GetList Type(*Boolean) Access(*Public)
+        DclFld Result               Type(*Boolean) Inz(*False)
         DclFld dt                   Type(DataTable)
         DclFld timer                Type(StopWatch) New()
         DclFld sb                   Type(StringBuilder) New()
@@ -240,47 +269,53 @@ BegClass DataList Access(*Public)
         DclFld FieldNameOUtputAlias Type(*String)
         DclArray FieldNameTokens    Type(*String) Rank(1) 
 
-        timer.Start()
+        Try
+            timer.Start()
+             dt = *This.GetRowsAsDataTable(*This.Rows) 
+            *This._ListAsDataTable = dt
+            *This.ResultRowCount = dt.Rows.Count
 
-        writer = *New JsonTextWriter(sw)
-        writer.Formatting = Formatting.Indented
-        writer.WriteStartObject()
-        writer.WritePropertyName("resultRowCount")
-        writer.WriteValue(*This.Rows)
-
-        dt = *This.GetRowsAsDataTable(*This.Rows) 
-        *This._ListDataTable = dt
-        *This.ResultRowCount = dt.Rows.Count
+            writer = *New JsonTextWriter(sw)
+            If (_IndentJson)
+                writer.Formatting = Formatting.Indented
+            Else
+                writer.Formatting = Formatting.None
+            EndIf
+            writer.WriteStartObject()
+            writer.WritePropertyName("resultRowCount")
+            writer.WriteValue(*This.ResultRowCount)
         
-        If (*This.GenerateJsonDataList) 
-            writer.WritePropertyName("list")
-            writer.WriteStartArray()      
-            ForEach dr Type(DataRow) Collection(dt.Rows)
-                writer.WriteStartObject()
-                ForEach field Type(*String) Collection(*This.Fields) 
-                    FieldNameTokens = GetFieldNameTokens(field) 
-                    RealFieldName = FieldNameTokens[0]
-                    FieldNameOutputAlias = FieldNameTokens[1]
-                    writer.WritePropertyName(FieldNameOutputAlias)
-                    writer.WriteValue(dr[RealFieldName].ToString().Trim()) 
-                EndFor
-                writer.WriteEndObject()
-            EndFor 
-            writer.WriteEndArray()
-        EndIf 
+            If (*This.GenerateJsonDataList) 
+                writer.WritePropertyName("list")
+                writer.WriteStartArray()      
+                ForEach dr Type(DataRow) Collection(dt.Rows)
+                    writer.WriteStartObject()
+                    ForEach field Type(*String) Collection(*This.Fields) 
+                        FieldNameTokens = GetFieldNameTokens(field) 
+                        RealFieldName = FieldNameTokens[0]
+                        FieldNameOutputAlias = FieldNameTokens[1]
+                        writer.WritePropertyName(FieldNameOutputAlias)
+                        writer.WriteValue(dr[RealFieldName].ToString().Trim()) 
+                    EndFor
+                    writer.WriteEndObject()
+                EndFor 
+                writer.WriteEndArray()
+            EndIf 
 
-        AddBeginningAndEndKeys(writer *As JsonTextWriter, dt)    
+            AddBeginningAndEndKeys(writer *As JsonTextWriter, dt)    
 
-        timer.Stop()
-        *This.Milliseconds = timer.ElapsedMilliseconds
-        writer.WritePropertyName("milliseconds")
-        writer.WriteValue(timer.ElapsedMilliseconds.ToString("#,##0")) 
+            timer.Stop()
+            *This.Milliseconds = timer.ElapsedMilliseconds
+            writer.WritePropertyName("milliseconds")
+            writer.WriteValue(timer.ElapsedMilliseconds.ToString("#,##0")) 
+            writer.Close()
+            _ListAsJson = sb.ToString() 
+            Result = *True 
+        Catch Except Type(System.Exception) 
+            *This._ErrorException = Except
+        EndTry 
 
-
-        writer.Close()
-        Json = sb.ToString() 
-
-        LeaveSr Json
+        LeaveSr Result
     EndFunc 
 
     BegSr AddBeginningAndEndKeys
