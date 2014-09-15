@@ -6,5 +6,4 @@ C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ASNA.Helpers.DataServices.dll
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.dll
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ASNA.Helpers.DataServices.pdb
-C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.pdb
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.xml

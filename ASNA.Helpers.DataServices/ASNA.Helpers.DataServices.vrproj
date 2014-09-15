@@ -47,6 +47,10 @@
       <SubType>
       </SubType>
     </Compile>
+    <Compile Include="DataListInstanceArgs.vr">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.vr" />
   </ItemGroup>
   <ItemGroup>

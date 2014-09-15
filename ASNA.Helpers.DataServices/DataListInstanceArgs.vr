@@ -1,0 +1,14 @@
+﻿Using System
+Using System.Text
+Using System.Collections.Generic 
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass DataListInstanceArgs Access(*Public)
+    DclFld library Type(*String) Access(*Public) 
+    DclFld file    Type(*String) Access(*Public) 
+    DclFld fields  Type(*String) Access(*Public) 
+    DclFld rows    Type(*Integer4) Access(*Public) 
+    DclFld query   Type(*String) Access(*Public) 
+    DclFld keys    Type(List(*Of FileKey)) Access(*Public) New()
+EndClass

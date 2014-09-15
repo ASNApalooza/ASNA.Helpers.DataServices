@@ -11,6 +11,7 @@ using ASNA.DataGate.Common
 Using ASNA.DataGate.DataLink
 Using ASNA.DataGate.Providers
 Using System.ComponentModel
+Using System.Diagnostics
 Using NewtonSoft.Json
 
 DclNameSpace ASNA.Helpers.DataServices
@@ -35,7 +36,7 @@ BegClass DataList Access(*Public)
         EndGet
     EndProp
 
-    DclFld _IndentJson Type(*Boolean)
+    DclFld _IndentJson Type(*Boolean) 
     BegProp IndentJson Type(*Boolean) Access(*Public) 
         BegSet
             _IndentJson = *PropVal
@@ -69,20 +70,84 @@ BegClass DataList Access(*Public)
     DclFld StartingKeys         Type(List(*Of FileKey)) Access(*Public) New()
     DclFld EndingKeys           Type(List(*Of FileKey)) Access(*Public) New()  
     
-    BegConstructor  Access(*Public) 
-        DclSrParm DGDB           Type(AdgConnection)
-        DclSrParm Library        Type(*String) 
-        DclSrParm File           Type(*String) 
-        DclSrParm Fields         Type(*String) 
-        DclSrParm Rows           Type(*Integer4)
-        
+//    BegConstructor  Access(*Public) 
+//        // Instance with individual arguments.
+//        DclSrParm DGDB           Type(AdgConnection)
+//        DclSrParm Library        Type(*String) 
+//        DclSrParm File           Type(*String) 
+//        DclSrParm Fields         Type(*String) 
+//        DclSrParm Rows           Type(*Integer4)
+//
+//        *This.DGDB = DGDB
+//        *This.Library = Library
+//        *This.File = File
+//        SetFieldsArray(Fields)
+//        *This.Rows = Rows
+//
+//        // If you instance this object this way, in the consuming code you need to immediately
+//        // use its AddKey method to add key fields and values and you need to set the Query property.
+//
+//        // DGList = *New ASNA.Helpers.DataServices.DataList(db,"examples","mylib","STATE,COUNTY",-1) 
+//        // DGList.AddKey("CMNAME","Smi")
+//        // DGList.AddKey("CMCUSTNO","30000")
+//        // DGList.Query = "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}" 
+//
+//        // One of the following constructors is probably better than this one for most cases. 
+//    EndConstructor 
+
+//    BegConstructor Access(*Public) //This(DGDB,args)
+//        // Instance with Json.
+//        DclSrParm DGDB   Type(AdgConnection)
+//        DclSrParm Json   Type(*String) 
+//
+//        DclFld args Type(DataListInstanceArgs)
+//
+//        timer.Start()
+//
+//        DclFld sw1 Type(Stopwatch) New()
+//
+//        sw1.Start()
+//        args = *New DataListInstanceArgs()
+//        args = JsonConvert.DeserializeObject(json, args.GetType()) *As DataListInstanceArgs
+//        sw1.Stop()
+//
+//        *This.DGDB = DGDB
+//        *This.Library = args.library
+//        *This.File = args.file
+//        SetFieldsArray(args.fields)
+//        *This.Rows = args.rows
+//        *This._Query = args.query
+//        SetKeyFields(args.keys)
+//    EndConstructor 
+
+    BegConstructor Access(*Public) 
+        // Instance with DataListInstanceArgs object.
+        DclSrParm DGDB   Type(AdgConnection)
+        DclSrParm Args   Type(DataListInstanceArgs) 
+
         *This.DGDB = DGDB
-        *This.Library = Library
-        *This.File = File
-        *This.Fields = Regex.Split(Fields.Trim(), "\s*,\s*") 
-        *This.Rows = Rows
+        *This.Library = args.library
+        *This.File = args.file
+        SetFieldsArray(args.fields)
+        *This.Rows = args.rows
+        *This._Query = args.query
+        SetKeyFields(args.keys)
     EndConstructor 
- 
+
+    BegSr SetFieldsArray 
+        DclSrParm FieldsString Type(*String) 
+
+        *This.Fields = Regex.Split(FieldsString.Trim(), "\s*,\s*") 
+    EndSr
+
+    BegSr SetKeyFields
+        DclSrParm Keys Type(List(*Of FileKey)) 
+
+        ForEach fk Type(FileKey) Collection(Keys) 
+            *This.AddKey(fk.FieldName, fk.FieldValue) 
+        EndFor 
+    EndSr
+     
     BegFunc OpenForDataSetForRead Access(*Private) Type(*Boolean) 
         DGFile = *New FileAdapter(DGDB,String.Format("{0}/{1}",Library.Trim(),File.Trim()))
         DGFile.OpenAttributes.BlockingFactor = FileOpenAttr.OptimalBlockingFactor
@@ -147,15 +212,6 @@ BegClass DataList Access(*Public)
                 Leave
             EndIf
         EndDo 
-
-
-//        DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
-//        Do FromVal(1) ToVal(RecordsToRead) 
-//            EOF = ReadNextRecord(DGFile)
-//            If (EOF) 
-//                Leave
-//            EndIf
-//        EndDo 
     EndSr
 
     BegFunc ReadNextRecord Type(*Boolean) 
@@ -260,17 +316,18 @@ BegClass DataList Access(*Public)
     BegFunc GetList Type(*Boolean) Access(*Public)
         DclFld Result               Type(*Boolean) Inz(*False)
         DclFld dt                   Type(DataTable)
-        DclFld timer                Type(StopWatch) New()
         DclFld sb                   Type(StringBuilder) New()
         DclFLd sw                   Type(StringWriter) New(sb)
         DclFld writer               Type(JsonWriter)
+        DclFld timer                Type(StopWatch) New()
 
         DclFld RealFieldName        Type(*String)
         DclFld FieldNameOUtputAlias Type(*String)
         DclArray FieldNameTokens    Type(*String) Rank(1) 
 
+        timer.Start()
+
         Try
-            timer.Start()
              dt = *This.GetRowsAsDataTable(*This.Rows) 
             *This._ListAsDataTable = dt
             *This.ResultRowCount = dt.Rows.Count
@@ -321,6 +378,7 @@ BegClass DataList Access(*Public)
     BegSr AddBeginningAndEndKeys
         DclSrParm writer           Type(JsonTextWriter)
         DclSrParm dt               Type(DataTable)
+
         DclFld dr                  Type(DataRow)         
 
         writer.WritePropertyName("startingKey")

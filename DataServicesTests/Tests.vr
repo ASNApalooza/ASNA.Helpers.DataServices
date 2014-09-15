@@ -4,6 +4,8 @@ Using System.Collections.Generic
 Using Microsoft.VisualStudio.TestTools.UnitTesting
 Using System.IO 
 Using ASNA.DataGate.Client
+Using NewtonSoft.Json
+Using System.Diagnostics
 
 // Set reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework
 
@@ -14,7 +16,11 @@ Using ASNA.DataGate.Client
 
 BegClass Tests Access(*Public) Attributes(TestClass())
 
-    DclDb pgmDB DBName("*Public/DG Net Local") 
+    //DclConst DBName Value("*Public/CYPRESS") 
+    DclConst DBName Value("*Public/DG NET Local") 
+
+
+    DclDb pgmDB 
 
     BegSr TestDataServiceCustomers Attributes(TestMethod()) Access(*Public)
         DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
@@ -23,18 +29,21 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld Result   Type(*Boolean) 
         DclFld Rows     Type(*Integer4)
 
-        Parms.Add("library","Examples")
-        Parms.Add("file","CMastNewL2")
-        Parms.Add("fields","CMCUSTNO:label,CMNAME:text,CMADDR1,CMCITY,CMState,CMPostCode")
-        Parms.Add("rows","12")
+        DclFld args     Type(ASNA.Helpers.DataServices.DataListInstanceArgs) New()
 
+        args.library  = "examples"
+        args.file     = "CmastNewL2"
+        args.fields   = "CMCUSTNO:label,CMNAME:text,CMADDR1,CMCITY,CMState,CMPostCode"
+        args.rows     = 12
+        args.query    = "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}" 
+        args.keys.add(*New ASNA.Helpers.DataServices.FileKey("CMNAME","Smi"))
+        args.keys.add(*New ASNA.Helpers.DataServices.FileKey("CMCUSTNO",30000))
+
+        pgmDB.DBName = DBName
         Connect pgmDB 
 
-        Rows = Convert.ToInt32(Parms["rows"])
-        DGList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,Parms["library"],parms["file"],parms["fields"],Rows)
-        DGList.AddKey("CMNAME","Smi")
-        DGList.AddKey("CMCUSTNO","30000")
-        DGList.Query = "CMNAME >= '{CMNAME}' AND CMCUSTNO >= {CMCUSTNO}" 
+        DGList = *New ASNA.Helpers.DataServices.DataList(pgmDB.Connection,args)
+        DGList.IndentJson = *True
        
         Result = DGList.GetList()
         Assert.IsTrue(Result)  
@@ -53,27 +62,64 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
     EndSr 
 
-    BegSr TestDataServiceCounty Attributes(TestMethod()) Access(*Public)
-        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
+//    BegSr TestDataServiceCountyByArg Attributes(TestMethod()) Access(*Public)
+//        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
+//        DclFld DGList   Type(ASNA.Helpers.DataServices.DataList)
+//        DclFld json     Type(*String)
+//        DclFld Result   Type(*Boolean)
+//        DclFld Rows     Type(*Integer4) 
+//
+//        Parms.Add("library","Devo")
+//        Parms.Add("file","County")
+//        Parms.Add("fields","COUNTY:label,STATE:value")
+//        Parms.Add("rows","-1")
+//
+//        DclFld db Type(AdgConnection) New(DBName) 
+//
+//        db.Open()
+//
+//        Rows = Convert.ToInt32(Parms["rows"]) 
+//        DGList = *New ASNA.Helpers.DataServices.DataList(db,Parms["library"],parms["file"],parms["fields"],Rows)
+//        DGList.AddKey("STATE","TX")
+//        DGList.AddKey("COUNTY","A")
+//        DGList.Query = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
+//        DGList.IndentJson = *True
+//
+//        Result = DGList.GetList()
+//        Assert.IsTrue(Result)  
+//        If (Result) 
+//            // Success.
+//        Else 
+//            // An error occurred.
+//        EndIf
+//
+//        db.Close()
+//
+//        json = DGList.ListAsJson
+//
+//        File.WriteAllText("c:\users\roger\documents\countiesByArg.json",json)
+//
+//        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(254))
+//    EndSr 
+    
+    BegSr TestDataServiceCountyByArgObject Attributes(TestMethod()) Access(*Public)
         DclFld DGList   Type(ASNA.Helpers.DataServices.DataList)
-        DclFld json     Type(*String)
         DclFld Result   Type(*Boolean)
-        DclFld Rows     Type(*Integer4) 
 
-        Parms.Add("library","Devo")
-        Parms.Add("file","County")
-        Parms.Add("fields","COUNTY,STATE")
-        Parms.Add("rows","-1")
+        DclFld args     Type(ASNA.Helpers.DataServices.DataListInstanceArgs) New()
+        DclFld db       Type(AdgConnection) New(DBName) 
+        DclFld Json     Type(*String)
 
-        DclFld db Type(AdgConnection) New("*Public/DG Net Local") 
+        args.library  = "devo"
+        args.file     = "county"
+        args.fields   = "STATE,COUNTY"
+        args.rows     = -1
+        args.keys.add(*New ASNA.Helpers.DataServices.FileKey("STATE","TX"))
+        args.keys.add(*New ASNA.Helpers.DataServices.FileKey("COUNTY","A"))
+        args.query    = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
 
         db.Open()
-
-        Rows = Convert.ToInt32(Parms["rows"]) 
-        DGList = *New ASNA.Helpers.DataServices.DataList(db,Parms["library"],parms["file"],parms["fields"],Rows)
-        DGList.AddKey("STATE","TX")
-        DGList.AddKey("COUNTY","A")
-        DGList.Query = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
+        DGList = *New ASNA.Helpers.DataServices.DataList(db,args)
         DGList.IndentJson = *True
 
         Result = DGList.GetList()
@@ -86,13 +132,43 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         db.Close()
 
-        json = DGList.ListAsJson
+        Json = DGList.ListAsJson
 
-        File.WriteAllText("c:\users\roger\documents\counties.json",json)
+        File.WriteAllText("c:\users\roger\documents\countiesByObject.json",json)
 
         Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(254))
     EndSr 
 
+//    BegSr TestDataServiceCountyByJson Attributes(TestMethod()) Access(*Public)
+//        DclFld DGList   Type(ASNA.Helpers.DataServices.DataList)
+//        DclFld Result   Type(*Boolean)
+//
+//        DclFld db       Type(AdgConnection) New(DBName) 
+//        DclFld json     Type(*String) 
+//
+//        json = File.ReadAllText("C:\Users\Roger\Documents\args.json") 
+//
+//        db.Open()
+//
+//        DGList = *New ASNA.Helpers.DataServices.DataList(db,json)
+//        DGList.IndentJson = *True
+//
+//        Result = DGList.GetList()
+//        Assert.IsTrue(Result)  
+//        If (Result) 
+//            // Success.
+//        Else 
+//            // An error occurred.
+//        EndIf
+//
+//        db.Close()
+//
+//        Json = DGList.ListAsJson
+//
+//        File.WriteAllText("c:\users\roger\documents\countiesByJson.json",json)
+//
+//        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(254))
+//    EndSr 
 
 
 
