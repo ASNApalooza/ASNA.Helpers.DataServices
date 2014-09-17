@@ -5,10 +5,11 @@ Using System.Collections.Generic
 DclNamespace ASNA.Helpers.DataServices
 
 BegClass DataListInstanceArgs Access(*Public)
-    DclFld library Type(*String) Access(*Public) 
-    DclFld file    Type(*String) Access(*Public) 
-    DclFld fields  Type(*String) Access(*Public) 
-    DclFld rows    Type(*Integer4) Access(*Public) 
-    DclFld query   Type(*String) Access(*Public) 
-    DclFld keys    Type(List(*Of FileKey)) Access(*Public) New()
+    DclFld Library      Type(*String) Access(*Public) 
+    DclFld File         Type(*String) Access(*Public) 
+    DclFld Fields       Type(*String) Access(*Public) 
+    DclFld Rows         Type(*Integer4) Access(*Public) 
+    DclFld Query        Type(*String) Access(*Public) 
+    DclFld QueryType    Type(ASNA.Helpers.DataServices.QueryType) Inz(ASNA.Helpers.DataServices.QueryType.Simple) Access(*Public)
+    DclFld QueryFields  Type(List(*Of QueryField)) Access(*Public) New()
 EndClass

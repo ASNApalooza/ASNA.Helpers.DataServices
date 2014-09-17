@@ -1,0 +1,173 @@
+﻿Using System
+Using System.Text
+Using System.Data
+Using System.Collections.Specialized
+Using System.Text.RegularExpressions
+Using System.Collections.Generic
+Using ASNA.DataGate.Client
+Using ASNA.DataGate.Common
+Using ASNA.DataGate.Providers
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegEnum  QueryType Access(*Public) 
+    DclEnumFld Paged
+    DclEnumFld Simple         
+EndEnum 
+
+BegClass DataGateAPI Access(*Public)
+
+    BegFunc ParseCommaDelimitedStringIntoArray Type(*String) Rank(1) Access(*Public) Shared(*Yes)
+        DclSrParm FieldsString Type(*String) 
+
+        DclArray Result Type(*String) Rank(1)
+
+        Result = Regex.Split(FieldsString.Trim(), "\s*,\s*") 
+
+        LeaveSr Result 
+    EndFunc 
+
+    BegFunc OpenDGFileForRead Type(FileAdapter) Access(*Public) Shared(*Yes)
+        DclSrParm DB        Type(AdgConnection)
+        DclSrParm Library   Type(*String)
+        DclSrParm File      Type(*String) 
+
+        DclFld DGFile Type(FileAdapter)
+        
+        DGFile = *New FileAdapter(DB,String.Format("{0}/{1}",Library.Trim(),File.Trim()))
+        DGFile.OpenAttributes.BlockingFactor = FileOpenAttr.OptimalBlockingFactor
+        DGFile.AccessMode = AccessMode.Read
+        
+        LeaveSr DGFile
+    EndFunc   
+
+    BegFunc ReadNextRecord Type(*Boolean) Access(*Public) Shared(*Yes)
+        DclSrParm DGFile Type(FileAdapter) 
+        DclSrParm DGDS   Type(AdgDataSet)
+
+        Try
+            DGFile.ReadSequential(DGDS, ReadSequentialMode.Next, LockRequest.Read)
+            LeaveSr *False 
+        Catch DgEx Type(dgException) 
+            If (DgEx.Error = dgErrorNumber.dgEaEOF)
+                LeaveSr *True 
+            Else
+                Throw DgEx           
+            EndIf
+        EndTry    
+    EndFunc     
+
+    BegSr PopulateDGKeysAndUsage Access(*Public) Shared(*Yes)
+        DclSrParm Keys        Type(*String) Rank(1) By(*Reference)
+        DclSrParm Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1) By(*Reference) 
+        DclSrParm QueryFields Type(List(*Of QueryField))
+
+        DclFld i Type(*Integer4)
+
+        Keys = *New String[QueryFields.Count] 
+        Usage = *New KeyUsages[QueryFields.Count] 
+        Do FromVal(0) ToVal(QueryFields.Count - 1) Index(i)
+            keys[i] = QueryFields[i].FieldName
+            Usage[i] = KeyUsages.ASCEND
+        EndDo     
+    EndSr
+
+    BegFunc SetCorrectAndOrInQuery  Type(*String) Access(*Public) Shared(*Yes)
+        DclSrParm Query              Type(*String)
+        DclSrParm PlatformIdentifier Type(*String)
+
+        DclFld Result Type(*String)
+
+        Result = Query.ToUpper()
+
+        If (PlatformIdentifier.Trim().ToUpper() = "DB2" OR PlatformIdentifier.Trim().ToUpper() = "IBM I")  
+            // Non-IBM i platforms don't want the asterisk with the AND/OR operations.
+            // This code assumes the database name label property isn't "DB2" for non-IBM i databases.
+//            Result = Regex.Replace(Query,"\s/*AND\s*", " *AND " )
+//            Result = Regex.Replace(Result,"\s/*OR\s*", " *OR " )
+            Result = Query.Replace(" AND "," *AND ") 
+            Result = Result.Replace(" OR "," *OR ") 
+        EndIf 
+
+        LeaveSr Result
+    EndFunc  
+
+    BegFunc EscapeQueryFieldValue Type(*String) Access(*Public) Shared(*Yes)
+        DclSrParm FieldValue Type(*String)
+        // OpenQueryFile chokes with embedded single apostrophes. This function
+        // swaps any single occurrence of an apostrophe for two apostrophes to solve
+        // that problem. Note that this is only changing the argument used OpenQueryFile--
+        // the underlying data is kept intact.
+
+        DclFld SINGLE_APOSTROPHE Type( *String ) Inz( "'" )
+        DclFld DOUBLE_APOSTROPHE Type( *String ) Inz( "''" )
+        
+        LeaveSr FieldValue.Replace(SINGLE_APOSTROPHE, DOUBLE_APOSTROPHE)         
+    EndFunc
+
+    BegFunc GetKeyTable Type(AdgKeyTable) Access(*Public) Shared(*Yes)
+        DclSrParm DGFile Type(FileAdapter) 
+        DclSrParm DGDS   Type(AdgDataSet)
+
+        DclFld FormatName Type(*String) 
+        DclFld Result Type(AdgKeyTable) 
+        
+        FormatName = DGFile.GetFormatName(0)      
+        Result = DGDS.NewKeyTable(FormatName) 
+        
+        LeaveSr Result         
+    EndFunc 
+    
+    BegSr DeleteColumnsFromDataTable Access(*Public) Shared(*Yes)
+        DclSrParm dt      Type(DataTable ) 
+        DclSrParm Fields  Type(*String) Rank(1)
+
+        DclFld  ColumnsToRemove Type(StringCollection) New()
+
+        ForEach Col Type( DataColumn ) Collection( dt.Columns )
+            If (NOT DataGateAPI.IsColumnInFieldsList(Col.ColumnName,Fields) )
+                ColumnsToRemove.Add(Col.ColumnName) 
+            EndIf
+        EndFor
+
+        ForEach Field Type(*String) Collection(ColumnsToRemove) 
+            dt.Columns.Remove(Field)                 
+        Endfor
+    EndSr
+
+    BegFunc IsColumnInFieldsList Type(*Boolean) Access(*Public) Shared(*Yes)
+        DclSrParm FieldNameToFind Type(*String)
+        DclSrParm Fields          Type(*String) Rank(1)
+
+        DclArray tokens    Type(*String) Rank(1)
+
+        ForEach field Type(*String) Collection(Fields) 
+            tokens = GetFieldNameTokens(field)
+            If (FieldNameToFind.ToUpper() = tokens[0].ToUpper())
+                LeaveSr *True
+            EndIf 
+        EndFor  
+
+        LeaveSr *False
+    EndFunc 
+
+    BegFunc GetFieldNameTokens Type(*String) Rank(1) Access(*Public) Shared(*Yes)
+        DclSrParm FieldName Type(*String) 
+
+        DclArray tokens    Type(*String) Rank(1) 
+
+        DclArray tokens Type(*String) Rank(1) 
+
+        If (FieldName.Contains(":")) 
+            tokens = Regex.Split(FieldName.Trim(), "\s*:\s*")             
+        Else
+            tokens = *New *String[2]
+            tokens[0] = FieldName
+            tokens[1] = FieldName
+        EndIf
+
+        LeaveSr tokens
+    EndFunc
+
+
+EndClass

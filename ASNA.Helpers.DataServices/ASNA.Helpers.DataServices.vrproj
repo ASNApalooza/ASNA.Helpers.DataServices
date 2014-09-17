@@ -39,11 +39,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataList.vr">
+    <Compile Include="DataGateAPI.vr">
       <SubType>
       </SubType>
     </Compile>
-    <Compile Include="FileKey.vr">
+    <Compile Include="QueryFile.vr">
+      <SubType>
+      </SubType>
+    </Compile>
+    <Compile Include="QueryField.vr">
       <SubType>
       </SubType>
     </Compile>

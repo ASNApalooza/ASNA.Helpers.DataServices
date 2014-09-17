@@ -1,5 +1,5 @@
 ﻿
-BegClass FileKey 
+BegClass QueryField 
     DclFld _FieldName Type( *String )
     BegProp FieldName Type( *String )  Access( *Public )
         BegGet
