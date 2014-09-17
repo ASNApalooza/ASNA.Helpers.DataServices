@@ -1,4 +1,4 @@
-# ASNA.Helpers.DataService
+# ASNA.Helpers.DataServices
 
 This namespace provides classes that enable dynamic querying files on the IBM i using ASNA DataGate (it also works with MS SQL Server and the ASNA Windows DB). 
 
