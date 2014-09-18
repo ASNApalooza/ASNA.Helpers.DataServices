@@ -51,7 +51,7 @@
       <SubType>
       </SubType>
     </Compile>
-    <Compile Include="DataListInstanceArgs.vr">
+    <Compile Include="QueryFileInstanceArgs.vr">
       <SubType>
       </SubType>
     </Compile>

@@ -4,7 +4,7 @@ Using System.Collections.Generic
 
 DclNamespace ASNA.Helpers.DataServices
 
-BegClass DataListInstanceArgs Access(*Public)
+BegClass QueryFileInstanceArgs Access(*Public)
     DclFld Library      Type(*String) Access(*Public) 
     DclFld File         Type(*String) Access(*Public) 
     DclFld Fields       Type(*String) Access(*Public) 

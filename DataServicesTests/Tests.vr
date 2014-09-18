@@ -28,7 +28,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld json     Type(*String)
         DclFld Result   Type(*Boolean) 
         
-        DclFld args     Type(ASNA.Helpers.DataServices.DataListInstanceArgs) New()
+        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
 
         args.Library   = "examples"
         args.File      = "CmastNewL2"
@@ -67,7 +67,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld json     Type(*String)
         DclFld Result   Type(*Boolean) 
         
-        DclFld args     Type(ASNA.Helpers.DataServices.DataListInstanceArgs) New()
+        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
 
         args.Library   = "examples"
         args.File      = "CmastNewL1"
@@ -101,7 +101,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
         DclFld Result   Type(*Boolean)
 
-        DclFld args     Type(ASNA.Helpers.DataServices.DataListInstanceArgs) New()
+        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
         DclFld db       Type(AdgConnection) New(DBName) 
         DclFld Json     Type(*String)
 
@@ -137,7 +137,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
         DclFld Result   Type(*Boolean)
 
-        DclFld args     Type(ASNA.Helpers.DataServices.DataListInstanceArgs) New()
+        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
         DclFld db       Type(AdgConnection) New(DBName) 
         DclFld Json     Type(*String)
 

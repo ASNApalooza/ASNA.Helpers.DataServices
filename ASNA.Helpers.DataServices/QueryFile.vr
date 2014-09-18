@@ -77,7 +77,7 @@ BegClass QueryFile Access(*Public)
     BegConstructor Access(*Public) 
         // Instance with DataListInstanceArgs object.
         DclSrParm DGDB   Type(AdgConnection)
-        DclSrParm Args   Type(DataListInstanceArgs) 
+        DclSrParm Args   Type(QueryFileInstanceArgs) 
 
         *This.DGDB = DGDB
         *This.Library = args.library
