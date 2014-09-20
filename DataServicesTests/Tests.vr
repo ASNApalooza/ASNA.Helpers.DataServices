@@ -45,12 +45,12 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld Args          Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
         DclFld dt            Type(DataTable)
 
-        Args.Library      = "examples"
-        Args.File         = "CmastNewL1"
-        Args.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
-        Args.Rows         = 12
-        Args.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
-        Args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Inputs.Library      = "examples"
+        Args.Inputs.File         = "CmastNewL1"
+        Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Inputs.Rows         = 12
+        Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
         dt = DGList.GetList() *As DataTable
@@ -60,23 +60,21 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 //            // An error occurred.
 //        EndIf
 //        Assert.IsTrue(Result)  
-        Assert.AreEqual(dt.Rows.Count, Args.Rows) 
+        Assert.AreEqual(dt.Rows.Count, Args.Inputs.Rows) 
     EndSr 
 
     BegSr PagedQueryToDataTable2 Attributes(TestMethod()) Access(*Public)
-        DclFld Result   Type(*Boolean) 
-        
         DclFld DGList        Type(ASNA.Helpers.DataServices.QueryFile)
         DclFld Args          Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
         DclFld dt            Type(DataTable)
         DclFld ArgsJson      Type(*String) 
 
-        Args.Library      = "examples"
-        Args.File         = "CmastNewL1"
-        Args.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
-        Args.Rows         = 12
-        Args.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
-        Args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Inputs.Library      = "examples"
+        Args.Inputs.File         = "CmastNewL1"
+        Args.Inputs.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Inputs.Rows         = 12
+        Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
         dt = DGList.GetList() *As DataTable
@@ -90,26 +88,24 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 //            // An error occurred.
 //        EndIf
 //        Assert.IsTrue(Result)  
-        Assert.AreEqual(dt.Rows.Count, Args.Rows) 
+        Assert.AreEqual(dt.Rows.Count, Args.Inputs.Rows) 
     EndSr 
 
 
     BegSr PagedQueryToJson Attributes(TestMethod()) Access(*Public)
-        DclFld Result   Type(*Boolean) 
-        
         DclFld DGList        Type(ASNA.Helpers.DataServices.QueryFile)
         DclFld Args          Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
         DclFld Json          Type(*String)
         DclFld JsonAdapter   Type(ASNA.Helpers.DataServices.ToJsonAdapter) 
         DclFld ArgsJson      Type(*String) 
 
-        Args.Library      = "examples"
-        Args.File         = "CmastNewL1"
-        Args.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
-        Args.Rows         = 12
-        Args.IndentJson   = *True 
-        Args.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
-        Args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Inputs.Library      = "examples"
+        Args.Inputs.File         = "CmastNewL1"
+        Args.Inputs.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Inputs.Rows         = 12
+        Args.Inputs.IndentJson   = *True 
+        Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         JsonAdapter = *New ASNA.Helpers.DataServices.ToJsonAdapter(Args) 
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args,JsonAdapter)

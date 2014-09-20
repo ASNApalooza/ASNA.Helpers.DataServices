@@ -6,51 +6,63 @@ DclNamespace ASNA.Helpers.DataServices
 
 BegClass QueryFileInstanceArgs Access(*Public)
 
-    // Inputs 
-    DclFld Library      Type(*String) Access(*Public) 
-    DclFld File         Type(*String) Access(*Public) 
-    DclFld FieldsList   Type(*String) Access(*Public) 
-    DclFld Rows         Type(*Integer4) Access(*Public) 
-    DclFld Query        Type(*String) Access(*Public) 
-    DclFld QueryType    Type(ASNA.Helpers.DataServices.QueryType) Inz(ASNA.Helpers.DataServices.QueryType.Simple) Access(*Public)
-    DclFld QueryFields  Type(List(*Of QueryField)) Access(*Public) New()
+    DclFld Inputs Type(InputArgs) Access(*Public) New()
 
     // Outputs 
-    DclArray Fields             Type(*String) Rank(1) Access(*Public)
-    DclArray FieldAliases       Type(*String) Rank(1) Access(*Public)
     DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
     DclFld ResultColCount       Type(*Integer4) Access(*Public) 
     DclFld Milliseconds         Type(*Integer4) Access(*Public)
     DclFld StartingKeys         Type(List(*Of QueryField)) Access(*Public) New()
     DclFld EndingKeys           Type(List(*Of QueryField)) Access(*Public) New()      
-    DclFld ErrorException       Type(System.Exception) Access(*Public) 
     DclFld Query                Type(*String) Access(*Public)
-    DclFld IndentJson           Type(*Boolean) Access(*Public) 
     DclFld JsonError            Type(*String) Access(*Public) 
 
+    DclFld Error Type(ErrorInfo) Access(*Public) New()
+
     // Error Info 
-    DclFld ErrorMessage   Type(*String) Access(*Public) 
-    DclFld ErrorNumber    Type(*String) Access(*Public) 
-    DclFld SystemError    Type(*String) Access(*Public) 
-    DclFld StackTrace     Type(*String) Access(*Public) 
 
-    BegSr Initialize Access(*Public) 
-        DclFld   i                  Type(*Integer4) 
-        DclArray FieldNameTokens    Type(*String) Rank(1) 
-        DclArray FieldsAsSpecified  Type(*String) Rank(1) 
 
-        FieldsAsSpecified = DataGateAPI.ParseCommaDelimitedStringIntoArray(*This.FieldsList)
+    BegClass InputArgs Access(*Public) 
+        // Inputs 
+        DclFld Library      Type(*String) Access(*Public) 
+        DclFld File         Type(*String) Access(*Public) 
+        DclFld FieldsList   Type(*String) Access(*Public) 
+        DclFld Rows         Type(*Integer4) Access(*Public) 
+        DclFld Query        Type(*String) Access(*Public) 
+        DclFld QueryType    Type(ASNA.Helpers.DataServices.QueryType) Inz(ASNA.Helpers.DataServices.QueryType.Simple) Access(*Public)
+        DclFld QueryFields  Type(List(*Of QueryField)) Access(*Public) New()
+        DclFld IndentJson   Type(*Boolean) Access(*Public) 
+        DclArray Fields         Type(*String) Rank(1) Access(*Public)
+        DclArray FieldAliases   Type(*String) Rank(1) Access(*Public)
 
-        *This.Fields = *New *String[FieldsAsSpecified.Length]
-        *This.FieldAliases = *New *String[FieldsAsSpecified.Length]
+        BegSr Initialize Access(*Public) 
+            DclFld   i                  Type(*Integer4) 
+            DclArray FieldNameTokens    Type(*String) Rank(1) 
+            DclArray FieldsAsSpecified  Type(*String) Rank(1) 
 
-        i = 0
-        ForEach Field Type(*String) Collection(FieldsAsSpecified) 
-            FieldNameTokens = DataGateAPI.GetFieldNameTokens(Field) 
-            Fields[i] = FieldNameTokens[0].ToLower()
-            FieldAliases[i] = FieldNameTokens[1].ToLower()             
-            i += 1
-        EndFor 
-    EndSr    
+            FieldsAsSpecified = DataGateAPI.ParseCommaDelimitedStringIntoArray(*This.FieldsList)
+
+            *This.Fields = *New *String[FieldsAsSpecified.Length]
+            *This.FieldAliases = *New *String[FieldsAsSpecified.Length]
+
+            i = 0
+            ForEach Field Type(*String) Collection(FieldsAsSpecified) 
+                FieldNameTokens = DataGateAPI.GetFieldNameTokens(Field) 
+                Fields[i] = FieldNameTokens[0].ToLower()
+                FieldAliases[i] = FieldNameTokens[1].ToLower()             
+                i += 1
+            EndFor 
+        EndSr    
+
+    EndClass
+
+    BegClass ErrorInfo Access(*Public)
+        DclFld ErrorMessage    Type(*String) Access(*Public) 
+        DclFld ErrorNumber     Type(*String) Access(*Public) 
+        DclFld SystemError     Type(*String) Access(*Public) 
+        DclFld StackTrace      Type(*String) Access(*Public) 
+        DclFld ErrorException  Type(System.Exception) Access(*Public) 
+    EndClass
+
 
 EndClass

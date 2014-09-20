@@ -125,7 +125,7 @@ BegClass DataGateAPI Access(*Public)
         DclFld  ColumnsToRemove Type(StringCollection) New()
 
         ForEach Col Type( DataColumn ) Collection( dt.Columns )
-            If ( System.Array.IndexOf(Args.Fields, Col.ColumnName.ToLower()) = -1 )
+            If ( System.Array.IndexOf(Args.Inputs.Fields, Col.ColumnName.ToLower()) = -1 )
                 ColumnsToRemove.Add(Col.ColumnName.ToLower()) 
             EndIf
         EndFor

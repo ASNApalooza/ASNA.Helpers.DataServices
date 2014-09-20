@@ -37,7 +37,7 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDB = DGDB
         *This.Args = Args
-        *This.Args.Initialize()
+        *This.Args.Inputs.Initialize()
 
         If ( OutputAdapter = *Nothing)            
             *This.OutputAdapter = *New ToDataTableAdapter()
@@ -49,9 +49,9 @@ BegClass QueryFile Access(*Public)
     BegFunc GetQueryRows Access(*Public) Type(DataTable) 
         DclSrParm RecordsToRead Type(*Integer4) 
        
-        *This.DGFile = DataGateAPI.OpenDGFileForRead(*This.DGDB,*This.Args.Library,*This.Args.File)
+        *This.DGFile = DataGateAPI.OpenDGFileForRead(*This.DGDB,*This.Args.Inputs.Library,*This.Args.Inputs.File)
 
-        If (*This.Args.QueryType = ASNA.Helpers.DataServices.QueryType.Simple) 
+        If (*This.Args.Inputs.QueryType = ASNA.Helpers.DataServices.QueryType.Simple) 
             ReadRowsWithSimpleQuery(RecordsToRead) 
         Else
             ReadRowsWithPagedQuery(RecordsToRead)
@@ -72,7 +72,7 @@ BegClass QueryFile Access(*Public)
         *This.DGFile.OpenNewAdgDataSet(*ByRef DGDS)
 
         Key = DGDS.NewKeyTable(0)
-        ForEach fk Type(QueryField) Collection(*This.Args.QueryFields) 
+        ForEach fk Type(QueryField) Collection(*This.Args.Inputs.QueryFields) 
             Key.Row[fk.FieldName] = fk.FieldValue 
         EndFor 
 
@@ -107,7 +107,7 @@ BegClass QueryFile Access(*Public)
 
         QueryMask.Append(CheckQueryArgs(*This.Args.Query.ToUpper())) 
         CreateQueryDefinition(QueryMask)                 
-        DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args.QueryFields)
+        DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args.Inputs.QueryFields)
         
         Query = QueryMask.ToString() 
         Query = DataGateAPI.SetCorrectAndOrInQuery(Query,DGDB.SourceProfile.Label)
@@ -149,9 +149,9 @@ BegClass QueryFile Access(*Public)
         DclFld i         Type(*Integer4)
         
         // Create query for OpenQueryFile.    
-        Do FromVal(0) ToVal(*This.Args.QueryFields.Count - 1) Index(i)
-            KeyValue = String.Format("{0}", DataGateAPI.EscapeQueryFieldValue(*This.Args.QueryFields[i].FieldValue.ToString())) 
-            KeyField = String.Format("{{{0}}}",*This.Args.QueryFields[i].FieldName.ToUpper())
+        Do FromVal(0) ToVal(*This.Args.Inputs.QueryFields.Count - 1) Index(i)
+            KeyValue = String.Format("{0}", DataGateAPI.EscapeQueryFieldValue(*This.Args.Inputs.QueryFields[i].FieldValue.ToString())) 
+            KeyField = String.Format("{{{0}}}",*This.Args.Inputs.QueryFields[i].FieldName.ToUpper())
             QueryMask.Replace(KeyField,KeyValue) 
         EndDo
     EndSr
@@ -162,12 +162,12 @@ BegClass QueryFile Access(*Public)
         DclFld dr  Type(DataRow)         
 
         dr = dt.Rows[0]         
-        ForEach key Type(QueryField) Collection(*This.Args.QueryFields)
+        ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
             *This.Args.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
         EndFor
 
         dr = dt.Rows[dt.Rows.Count-1] 
-        ForEach key Type(QueryField) Collection(*This.Args.QueryFields)
+        ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
             *This.Args.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
         EndFor
     EndSr
@@ -178,7 +178,7 @@ BegClass QueryFile Access(*Public)
         timer.Start()
 
         Try
-             *This.GetQueryRows(*This.Args.Rows) 
+             *This.GetQueryRows(*This.Args.Inputs.Rows) 
              DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
              SetdBeginningAndEndKeys(DGDS.Tables[0])
              timer.Stop()
@@ -188,17 +188,17 @@ BegClass QueryFile Access(*Public)
              OutputAdapter.Render(DGDS.Tables[0])
 
         Catch DGExcept Type(dgException)
-            *This.Args.ErrorMessage = DGExcept.Message
-            *This.Args.ErrorNumber  = DGExcept.Error.ToString()
-            *This.Args.SystemError  = DGExcept.SystemError.ToString() 
-            *This.Args.StackTrace   = DGExcept.StackTrace
-            *This.Args.ErrorException = Except
+            *This.Args.Error.ErrorMessage = DGExcept.Message
+            *This.Args.Error.ErrorNumber  = DGExcept.Error.ToString()
+            *This.Args.Error.SystemError  = DGExcept.SystemError.ToString() 
+            *This.Args.Error.StackTrace   = DGExcept.StackTrace
+            *This.Args.Error.ErrorException = Except
 
         Catch Except Type(System.Exception) 
-            *This.Args.ErrorMessage = DGExcept.Message
-            *This.Args.ErrorNumber  = "No error number"
-            *This.Args.SystemError  = "No system error"
-            *This.Args.ErrorException = Except
+            *This.Args.Error.ErrorMessage = DGExcept.Message
+            *This.Args.Error.ErrorNumber  = "No error number"
+            *This.Args.Error.SystemError  = "No system error"
+            *This.Args.Error.ErrorException = Except
         EndTry 
 
         LeaveSr OutputAdapter.Result()
