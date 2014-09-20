@@ -138,6 +138,10 @@ BegClass QueryFile Access(*Public)
             x = ex.Message
         EndTry 
 
+        DclFld i  Type(*Integer4) 
+        DclFld dr Type(DataRow) 
+        DclFld x  Type(*String) 
+
         Do FromVal(1) ToVal(RecordsToRead) 
             EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
             If (EOF) 
