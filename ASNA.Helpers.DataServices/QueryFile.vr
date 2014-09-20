@@ -25,7 +25,6 @@ BegClass QueryFile Access(*Public)
     DclFld Args           Type(QueryFileInstanceArgs) 
   
     BegConstructor Access(*Public) This(DGDB,Args,*Nothing)
-        // Instance with DataListInstanceArgs object.
         DclSrParm DGDB   Type(AdgConnection)
         DclSrParm Args   Type(QueryFileInstanceArgs) 
 
@@ -131,10 +130,10 @@ BegClass QueryFile Access(*Public)
 
         // Ensure that replacement query args are in the format
         // {arg} with not spaces inside the braces.
-        DclConst OPENING_BRACE_WITH_TRAILING_SPACE Value("{\s*") 
-        DclConst CLOSING_BRACE_WITH_TRAILING_SPACE Value("\s*}") 
-        DclConst OPENING_BRACE                     Value("{")
-        DclConst CLOSING_BRACE                     Value("}")
+        DclConst OPENING_BRACE_WITH_TRAILING_SPACE Value('{\s*') 
+        DclConst CLOSING_BRACE_WITH_TRAILING_SPACE Value('\s*}') 
+        DclConst OPENING_BRACE                     Value('{')
+        DclConst CLOSING_BRACE                     Value('}')
 
         Result = Regex.Replace(Query,OPENING_BRACE_WITH_TRAILING_SPACE, OPENING_BRACE)
         Result = Regex.Replace(Result,CLOSING_BRACE_WITH_TRAILING_SPACE, CLOSING_BRACE)
