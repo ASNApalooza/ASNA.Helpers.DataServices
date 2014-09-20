@@ -120,13 +120,13 @@ BegClass DataGateAPI Access(*Public)
     
     BegSr DeleteColumnsFromDataTable Access(*Public) Shared(*Yes)
         DclSrParm dt      Type(DataTable ) 
-        DclSrParm Fields  Type(*String) Rank(1)
+        DclSrParm Args    Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
 
         DclFld  ColumnsToRemove Type(StringCollection) New()
 
         ForEach Col Type( DataColumn ) Collection( dt.Columns )
-            If (NOT DataGateAPI.IsColumnInFieldsList(Col.ColumnName,Fields) )
-                ColumnsToRemove.Add(Col.ColumnName) 
+            If ( System.Array.IndexOf(Args.Fields, Col.ColumnName.ToLower()) = -1 )
+                ColumnsToRemove.Add(Col.ColumnName.ToLower()) 
             EndIf
         EndFor
 
@@ -134,22 +134,6 @@ BegClass DataGateAPI Access(*Public)
             dt.Columns.Remove(Field)                 
         Endfor
     EndSr
-
-    BegFunc IsColumnInFieldsList Type(*Boolean) Access(*Public) Shared(*Yes)
-        DclSrParm FieldNameToFind Type(*String)
-        DclSrParm Fields          Type(*String) Rank(1)
-
-        DclArray tokens    Type(*String) Rank(1)
-
-        ForEach field Type(*String) Collection(Fields) 
-            tokens = GetFieldNameTokens(field)
-            If (FieldNameToFind.ToUpper() = tokens[0].ToUpper())
-                LeaveSr *True
-            EndIf 
-        EndFor  
-
-        LeaveSr *False
-    EndFunc 
 
     BegFunc GetFieldNameTokens Type(*String) Rank(1) Access(*Public) Shared(*Yes)
         DclSrParm FieldName Type(*String) 
@@ -168,6 +152,4 @@ BegClass DataGateAPI Access(*Public)
 
         LeaveSr tokens
     EndFunc
-
-
 EndClass

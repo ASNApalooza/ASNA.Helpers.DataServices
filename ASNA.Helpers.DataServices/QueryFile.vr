@@ -18,92 +18,41 @@ Using NewtonSoft.Json
 DclNameSpace ASNA.Helpers.DataServices
 
 BegClass QueryFile Access(*Public) 
-    DclFld DGDB      Type(AdgConnection) 
-    DclFld DGFile    Type(FileAdapter)     
-    DclFld DGDS      Type(AdgDataSet)
-    DclFld Library   Type(*String) 
-    DclFld File      Type(*String) 
-    DclFld Rows      Type(*Integer4)
-    DclFld QueryType Type(*Integer4) Inz(ASNA.Helpers.DataServices.QueryType.Simple) 
-
-    DclArray Fields Type(*String) Rank(1) Access(*Private)
-    
-    DclFld QueryFields Type(List(*Of QueryField)) Access(*Private) New()
-    DclFld DGDB  Type(AdgConnection) Access(*Private)   
-    
-    DclFld _ErrorException Type(System.Exception) 
-    BegProp ErrorException Type(System.Exception) Access(*Public)
-        BegGet
-            LeaveSr _ErrorException
-        EndGet
-    EndProp
-
-    DclFld _IndentJson Type(*Boolean) 
-    BegProp IndentJson Type(*Boolean) Access(*Public) 
-        BegSet
-            _IndentJson = *PropVal
-        EndSet
-    EndProp
-
-    DclFld _Query Type(*String) 
-    BegProp Query Type(*String) Access(*Public)
-        BegSet
-            *This._Query = *PropVal 
-        EndSet
-    EndProp 
-
-    DclFld _ListAsDataTable Type(DataTable) 
-    BegProp ListAsDataTable Type(DataTable) Access(*Public) 
-        BegGet 
-            LeaveSr *This._ListAsDataTable
-        EndGet 
-    EndProp 
-
-    DclFld _ListAsJson Type(*String)
-    BegProp ListAsJson Type(*String) Access(*Public)
-        BegGet
-            LeaveSr *This._ListAsJson
-        EndGet
-    EndProp
-
-    DclFld FieldsList Type(*String)
-
-    DclFld GenerateJsonDataList Type(*Boolean) Inz(*True) Access(*Public)
-    DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
-    DclFld Milliseconds         Type(*Integer4) Access(*Public)
-    DclFld StartingKeys         Type(List(*Of QueryField)) Access(*Public) New()
-    DclFld EndingKeys           Type(List(*Of QueryField)) Access(*Public) New()  
-   
-    BegConstructor Access(*Public) 
+    DclFld DGDB           Type(AdgConnection) 
+    DclFld DGFile         Type(FileAdapter)     
+    DclFld DGDS           Type(AdgDataSet)
+    DclFld OutputAdapter  Type(iQueryFileAdapter) 
+    DclFld Args           Type(QueryFileInstanceArgs) 
+  
+    BegConstructor Access(*Public) This(DGDB,Args,*Nothing)
         // Instance with DataListInstanceArgs object.
         DclSrParm DGDB   Type(AdgConnection)
         DclSrParm Args   Type(QueryFileInstanceArgs) 
 
-        *This.DGDB = DGDB
-        *This.Library = args.library
-        *This.File = args.file
-        *This.Fields = DataGateAPI.ParseCommaDelimitedStringIntoArray(args.Fields)
-        *THis.FieldsList = args.Fields 
-        *This.Rows = args.rows
-        *This._Query = args.query
-        *This.QueryType = args.QueryType
-        SetKeyFields(args.QueryFields)
     EndConstructor 
 
-    BegSr SetKeyFields
-        DclSrParm QueryFields Type(List(*Of QueryField)) 
+    BegConstructor Access(*Public) 
+        DclSrParm DGDB          Type(AdgConnection)
+        DclSrParm Args          Type(QueryFileInstanceArgs) 
+        DclSrParm OutputAdapter Type(iQueryFileAdapter)
 
-        ForEach fk Type(QueryField) Collection(QueryFields) 
-             *This.QueryFields.Add(*New QueryField(fk.FieldName, fk.FieldValue) )
-        EndFor 
-    EndSr
+        *This.DGDB = DGDB
+        *This.Args = Args
+        *This.Args.Initialize()
+
+        If ( OutputAdapter = *Nothing)            
+            *This.OutputAdapter = *New ToDataTableAdapter()
+        Else
+            *This.OutputAdapter = OutputAdapter
+        End
+    EndConstructor 
       
     BegFunc GetQueryRows Access(*Public) Type(DataTable) 
         DclSrParm RecordsToRead Type(*Integer4) 
        
-        *This.DGFile = DataGateAPI.OpenDGFileForRead(*This.DGDB,*This.Library,*This.File)
+        *This.DGFile = DataGateAPI.OpenDGFileForRead(*This.DGDB,*This.Args.Library,*This.Args.File)
 
-        If (*This.QueryType = ASNA.Helpers.DataServices.QueryType.Simple) 
+        If (*This.Args.QueryType = ASNA.Helpers.DataServices.QueryType.Simple) 
             ReadRowsWithSimpleQuery(RecordsToRead) 
         Else
             ReadRowsWithPagedQuery(RecordsToRead)
@@ -124,7 +73,7 @@ BegClass QueryFile Access(*Public)
         *This.DGFile.OpenNewAdgDataSet(*ByRef DGDS)
 
         Key = DGDS.NewKeyTable(0)
-        ForEach fk Type(QueryField) Collection(*This.QueryFields) 
+        ForEach fk Type(QueryField) Collection(*This.Args.QueryFields) 
             Key.Row[fk.FieldName] = fk.FieldValue 
         EndFor 
 
@@ -137,10 +86,6 @@ BegClass QueryFile Access(*Public)
             DclFLd x Type(*String) 
             x = ex.Message
         EndTry 
-
-        DclFld i  Type(*Integer4) 
-        DclFld dr Type(DataRow) 
-        DclFld x  Type(*String) 
 
         Do FromVal(1) ToVal(RecordsToRead) 
             EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
@@ -161,9 +106,9 @@ BegClass QueryFile Access(*Public)
         DclArray Keys        Type(*String) Rank(1)
         DclArray Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1)
 
-        QueryMask.Append(CheckQueryArgs(*This._Query.ToUpper())) 
+        QueryMask.Append(CheckQueryArgs(*This.Args.Query.ToUpper())) 
         CreateQueryDefinition(QueryMask)                 
-        DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.QueryFields)
+        DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args.QueryFields)
         
         Query = QueryMask.ToString() 
         Query = DataGateAPI.SetCorrectAndOrInQuery(Query,DGDB.SourceProfile.Label)
@@ -186,8 +131,13 @@ BegClass QueryFile Access(*Public)
 
         // Ensure that replacement query args are in the format
         // {arg} with not spaces inside the braces.
-        Result = Regex.Replace(Query,"{\s*", "{")
-        Result = Regex.Replace(Result,"\s*}", "}")
+        DclConst OPENING_BRACE_WITH_TRAILING_SPACE Value("{\s*") 
+        DclConst CLOSING_BRACE_WITH_TRAILING_SPACE Value("\s*}") 
+        DclConst OPENING_BRACE                     Value("{")
+        DclConst CLOSING_BRACE                     Value("}")
+
+        Result = Regex.Replace(Query,OPENING_BRACE_WITH_TRAILING_SPACE, OPENING_BRACE)
+        Result = Regex.Replace(Result,CLOSING_BRACE_WITH_TRAILING_SPACE, CLOSING_BRACE)
 
         LeaveSr Result 
     EndFunc 
@@ -200,176 +150,60 @@ BegClass QueryFile Access(*Public)
         DclFld i         Type(*Integer4)
         
         // Create query for OpenQueryFile.    
-        Do FromVal(0) ToVal(*This.QueryFields.Count - 1) Index(i)
-            KeyValue = String.Format("{0}", DataGateAPI.EscapeQueryFieldValue(*This.QueryFields[i].FieldValue.ToString())) 
-            KeyField = String.Format("{{{0}}}",*This.QueryFields[i].FieldName.ToUpper())
+        Do FromVal(0) ToVal(*This.Args.QueryFields.Count - 1) Index(i)
+            KeyValue = String.Format("{0}", DataGateAPI.EscapeQueryFieldValue(*This.Args.QueryFields[i].FieldValue.ToString())) 
+            KeyField = String.Format("{{{0}}}",*This.Args.QueryFields[i].FieldName.ToUpper())
             QueryMask.Replace(KeyField,KeyValue) 
         EndDo
     EndSr
 
-    BegFunc GetList Type(*Boolean) Access(*Public)
-        DclFld dt                   Type(DataTable)
+    BegSr SetdBeginningAndEndKeys
+        DclSrParm dt Type(DataTable) 
+
+        DclFld dr  Type(DataRow)         
+
+        dr = dt.Rows[0]         
+        ForEach key Type(QueryField) Collection(*This.Args.QueryFields)
+            *This.Args.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+        EndFor
+
+        dr = dt.Rows[dt.Rows.Count-1] 
+        ForEach key Type(QueryField) Collection(*This.Args.QueryFields)
+            *This.Args.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+        EndFor
+    EndSr
+
+    BegFunc GetList Type(*Object) Access(*Public)
         DclFld timer                Type(StopWatch) New()
 
         timer.Start()
 
         Try
-             dt = *This.GetQueryRows(*This.Rows) 
-             DataGateAPI.DeleteColumnsFromDataTable(dt,*This.Fields)
+             *This.GetQueryRows(*This.Args.Rows) 
+             DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+             SetdBeginningAndEndKeys(DGDS.Tables[0])
              timer.Stop()
-
-             *This._ListAsDataTable = dt
-             *This.ResultRowCount = dt.Rows.Count
-             *This.Milliseconds = timer.ElapsedMilliseconds
-             *This._ListAsJson = GetJsonData(dt,*This.Milliseconds) 
+             *This.Args.ResultRowCount  = DGDS.Tables[0].Rows.Count 
+             *This.Args.ResultColCount  = DGDS.Tables[0].Columns.Count
+             *This.Args.Milliseconds    = timer.ElapsedMilliseconds
+             OutputAdapter.Render(DGDS.Tables[0])
 
         Catch DGExcept Type(dgException)
-            _ListAsJson = GetJsonError(DGExcept.Message,DGExcept.Error.ToString(),DGExcept.SystemError.ToString(),DGExcept.StackTrace) 
-            *This._ErrorException = Except
+            *This.Args.ErrorMessage = DGExcept.Message
+            *This.Args.ErrorNumber  = DGExcept.Error.ToString()
+            *This.Args.SystemError  = DGExcept.SystemError.ToString() 
+            *This.Args.StackTrace   = DGExcept.StackTrace
+            *This.Args.ErrorException = Except
 
         Catch Except Type(System.Exception) 
-            _ListAsJson = GetJsonError(Except.Message,"No error number","No system error", Except.StackTrace) 
-            *This._ErrorException = Except
+            *This.Args.ErrorMessage = DGExcept.Message
+            *This.Args.ErrorNumber  = "No error number"
+            *This.Args.SystemError  = "No system error"
+            *This.Args.ErrorException = Except
         EndTry 
 
-
-        LeaveSr *True
+        LeaveSr OutputAdapter.Result()
     EndFunc 
 
-    BegFunc GetJsonData Type(*String)
-        DclSrParm dt           Type(DataTable)
-        DclSrParm Milliseconds Type(*Integer4)
-
-        DclFld sb                   Type(StringBuilder) New()
-        DclFld sw                   Type(StringWriter) New(sb)
-        DclFld writer               Type(JsonWriter)
-        DclFld RealFieldName        Type(*String)
-        DclFld FieldNameOutputAlias Type(*String)
-
-        DclArray FieldNameTokens    Type(*String) Rank(1) 
-
-        writer = *New JsonTextWriter(sw)
-        If (_IndentJson)
-            writer.Formatting = Formatting.Indented
-        Else
-            writer.Formatting = Formatting.None
-        EndIf
-        writer.WriteStartObject()
-        writer.WritePropertyName("resultRowCount")
-        writer.WriteValue(*This.ResultRowCount)
-        
-        If (*This.GenerateJsonDataList) 
-            writer.WritePropertyName("list")
-            writer.WriteStartArray()      
-            ForEach dr Type(DataRow) Collection(dt.Rows)
-                writer.WriteStartObject()
-                ForEach field Type(*String) Collection(*This.Fields) 
-                    FieldNameTokens = DataGateAPI.GetFieldNameTokens(field) 
-                    RealFieldName = FieldNameTokens[0]
-                    FieldNameOutputAlias = FieldNameTokens[1]
-                    writer.WritePropertyName(FieldNameOutputAlias)
-                    writer.WriteValue(dr[RealFieldName].ToString().Trim()) 
-                EndFor
-                writer.WriteEndObject()
-            EndFor 
-            writer.WriteEndArray()
-        EndIf 
-
-        AddBeginningAndEndKeys(writer *As JsonTextWriter, dt)    
-
-        writer.WritePropertyName("milliseconds")
-        writer.WriteValue(Milliseconds.ToString("#,##0")) 
-        writer.Close()
-
-        LeaveSr sb.ToString() 
-    EndFunc
-
-    BegFunc GetJsonError Type(*String)
-        DclSrParm Message     Type(*String) 
-        DclSrParm ErrorNumber Type(*String) 
-        DclSrParm SystemError Type(*String) 
-        DclSrParm StackTrace  Type(*String) 
-        
-        DclFld sb                   Type(StringBuilder) New()
-        DclFld sw                   Type(StringWriter) New(sb)
-        DclFld writer               Type(JsonWriter)
-
-        writer = *New JsonTextWriter(sw)
-        writer.Formatting = Formatting.Indented
-        writer.WriteStartObject()
-            writer.WritePropertyName("error")
-            writer.WriteStartObject()
-                writer.WritePropertyName("nessage")
-                writer.WriteValue(Message) 
-
-                writer.WritePropertyName("error number")
-                writer.WriteValue(ErrorNumber)
-
-                writer.WritePropertyName("system error")
-                writer.WriteValue(SystemError)
-
-                writer.WritePropertyName("stack trace")
-                writer.WriteValue(StackTrace)
-
-                writer.WritePropertyName("query configuration")
-                    writer.WriteStartObject()
-                        writer.WritePropertyName("query")
-                        writer.WriteValue(*This._Query) 
-
-                        writer.WritePropertyName("query type (0=paged, 1=simple)")
-                        writer.WriteValue(*This.QueryType.ToString())
-
-                        writer.WritePropertyName("libraryFile")
-                        writer.WriteValue(String.Format("{0}/{1}",*This.Library,*This.File)) 
-
-                        writer.WritePropertyName("field list")
-                        writer.WriteValue(*This.FieldsList)
-                        
-                        writer.WritePropertyName("fields")
-                        writer.WriteStartObject()
-                        ForEach fk Type(QueryField) Collection(QueryFields) 
-                              writer.WritePropertyName(fk.FieldName)
-                              writer.WriteValue(fk.FieldValue) 
-                        EndFor 
-                        writer.WriteEndObject()
-                    writer.WriteEndObject()
-            writer.WriteEndObject()
-        writer.WriteEndObject()
-        writer.Close()
-
-        LeaveSr sb.ToString() 
-    EndFunc
-
-    BegSr AddBeginningAndEndKeys
-        DclSrParm writer           Type(JsonTextWriter)
-        DclSrParm dt               Type(DataTable)
-
-        DclFld dr                  Type(DataRow)         
-
-        writer.WritePropertyName("startingKey")
-        writer.WriteStartArray()      
-        dr = dt.Rows[0]         
-        ForEach key Type(QueryField) Collection(*This.QueryFields)
-            writer.WriteStartObject()
-            writer.WritePropertyName(key.FieldName)
-            writer.WriteValue(dr[key.FieldName].ToString().Trim()) 
-            writer.WriteEndObject() 
-            *This.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
-        EndFor
-        writer.WriteEndArray()
-                
-        writer.WritePropertyName("endingKey")
-        writer.WriteStartArray()      
-        dr = dt.Rows[dt.Rows.Count-1] 
-        ForEach key Type(QueryField) Collection(*This.QueryFields)
-            writer.WriteStartObject()
-            writer.WritePropertyName(key.FieldName)
-            writer.WriteValue(dr[key.FieldName].ToString().Trim()) 
-            writer.WriteEndObject() 
-            *This.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
-        EndFor
-        
-        writer.WriteEndArray()
-    EndSr
-
 EndClass
+

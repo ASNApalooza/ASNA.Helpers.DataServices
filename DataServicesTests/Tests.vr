@@ -1,5 +1,6 @@
 ﻿Using System
 Using System.Text
+Using System.Data
 Using System.Collections.Generic
 Using Microsoft.VisualStudio.TestTools.UnitTesting
 Using System.IO 
@@ -16,18 +17,19 @@ Using System.Diagnostics
 
 BegClass Tests Access(*Public) Attributes(TestClass())
 
-     //DclConst DBName Value("*Public/CYPRESS") 
+    //DclConst DBName Value("*Public/CYPRESS") 
     DclConst DBName Value("*Public/DG NET Local") 
 
     DclFld db       Type(AdgConnection) Shared(*Yes)
+
     BegSr OpenDB Access(*Public) Attributes(ClassInitialize()) Shared(*Yes)
-        DclSrParm context Type(TestContext)
+        DclSrParm context Type(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext)
 
         Tests.db = *New AdgConnection(DBName) 
         Tests.db.Open()
 
         // Give the connection time to spin up. 
-       Sleep 10000
+       //Sleep 10000
     EndSr
 
     BegSr CloseDB Access(*Public) Attributes(ClassCleanup()) Shared(*Yes)
@@ -37,156 +39,214 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 //    BegSr AnotherTest Attributes(TestMethod()) Access(*Public)
 //        Sleep 5000
 //    EndSr
-    
-    BegSr CustomersWithSimpleQuerySecond Attributes(TestMethod()) Access(*Public)
-        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
-        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
-        DclFld json     Type(*String)
+
+    BegSr PagedQueryToDataTable Attributes(TestMethod()) Access(*Public)       
+        DclFld DGList        Type(ASNA.Helpers.DataServices.QueryFile)
+        DclFld Args          Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFld dt            Type(DataTable)
+
+        Args.Library      = "examples"
+        Args.File         = "CmastNewL1"
+        Args.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Rows         = 12
+        Args.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        Args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+                
+        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
+        dt = DGList.GetList() *As DataTable
+//        If (Result) 
+//            dt = DGList.ListAsDataTable
+//        Else 
+//            // An error occurred.
+//        EndIf
+//        Assert.IsTrue(Result)  
+        Assert.AreEqual(dt.Rows.Count, Args.Rows) 
+    EndSr 
+
+    BegSr PagedQueryToDataTable2 Attributes(TestMethod()) Access(*Public)
         DclFld Result   Type(*Boolean) 
         
-        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFld DGList        Type(ASNA.Helpers.DataServices.QueryFile)
+        DclFld Args          Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFld dt            Type(DataTable)
+        DclFld ArgsJson      Type(*String) 
 
-        args.Library   = "examples"
-        args.File      = "CmastNewL1"
-        args.Fields    = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
-        args.Rows      = 12
-        args.QueryType = ASNA.Helpers.DataServices.QueryType.Paged
-        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
-        //args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","Carl Cranke"))
-
+        Args.Library      = "examples"
+        Args.File         = "CmastNewL1"
+        Args.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Rows         = 12
+        Args.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        Args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+                
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
-        DGList.IndentJson = *True
-       
-        Result = DGList.GetList()
-        json = DGList.ListAsJson        
-        File.WriteAllText("c:\users\roger\documents\testing\CustomersWithSimpleQuerySecond.json",json)
-        
-        If (Result) 
-            // Success.
-        Else 
-            // An error occurred.
-        EndIf
-        Assert.IsTrue(Result)  
-        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
+        dt = DGList.GetList() *As DataTable
+
+        ArgsJson = JsonConvert.SerializeObject(Args,Formatting.Indented)
+        File.WriteAllText("c:\users\roger\documents\testing\PagedQueryToDataTable2-Args.json",ArgsJson)
+
+//        If (Result) 
+//            dt = DGList.ListAsDataTable
+//        Else 
+//            // An error occurred.
+//        EndIf
+//        Assert.IsTrue(Result)  
+        Assert.AreEqual(dt.Rows.Count, Args.Rows) 
     EndSr 
 
-     
-     BegSr CustomersWithSimpleQueryFirst Attributes(TestMethod()) Access(*Public)
-        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
-        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
-        DclFld json     Type(*String)
+
+    BegSr PagedQueryToJson Attributes(TestMethod()) Access(*Public)
         DclFld Result   Type(*Boolean) 
         
-        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFld DGList        Type(ASNA.Helpers.DataServices.QueryFile)
+        DclFld Args          Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFld Json          Type(*String)
+        DclFld JsonAdapter   Type(ASNA.Helpers.DataServices.ToJsonAdapter) 
+        DclFld ArgsJson      Type(*String) 
 
-        args.Library   = "examples"
-        args.File      = "CmastNewL2"
-        args.Fields    = "CMCUSTNO,CMNAME"
-        args.Rows      = 12
-        args.QueryType = ASNA.Helpers.DataServices.QueryType.Paged
-        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","A"))
-        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Library      = "examples"
+        Args.File         = "CmastNewL1"
+        Args.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Rows         = 12
+        Args.IndentJson   = *True 
+        Args.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        Args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+                
+        JsonAdapter = *New ASNA.Helpers.DataServices.ToJsonAdapter(Args) 
+        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args,JsonAdapter)
+        Json = DGList.GetList() *As *String
 
-        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
-        DGList.IndentJson = *True
-       
-        Result = DGList.GetList()
+        ArgsJson = JsonConvert.SerializeObject(Args,Formatting.Indented)
+        File.WriteAllText("c:\users\roger\documents\testing\PagedQueryToJson-args.json",ArgsJson)
 
-        json = DGList.ListAsJson
-        json = json.Replace("\r\n",Environment.NewLine) 
-        File.WriteAllText("c:\users\roger\documents\testing\CustomersWithSimpleQueryFirst.json",json)
+        File.WriteAllText("c:\users\roger\documents\testing\PagedQueryToJson.json",Json)
 
-        If (Result) 
-            // Success.
-        Else 
-            // An error occurred.
-        EndIf
-        Assert.IsTrue(Result)  
-        Assert.AreEqual(DGList.ListAsDataTable.Columns.Count, Convert.ToInt32(2)) 
-        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
+//        If (Result) 
+//            dt = DGList.ListAsDataTable
+//        Else 
+//            // An error occurred.
+//        EndIf
+//        Assert.IsTrue(Result)  
+          //Assert.AreEqual(dt.Rows.Count, Args.Rows) 
     EndSr 
 
-   
-    BegSr TestDataServiceCountyByArgObject Attributes(TestMethod()) Access(*Public)
-        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
-        DclFld Result   Type(*Boolean)
-
-        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
-        DclFld Json     Type(*String)
-
-        args.library  = "devo"
-        args.file     = "county"
-        args.fields   = "STATE:value,COUNTY:label"
-        args.rows     = -1
-        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("STATE","TX"))
-        args.QueryFields.add(*New ASNA.Helpers.DataServices.QueryField("COUNTY","A"))
-        //args.QueryType = ASNA.Helpers.DataServices.QueryType.Simple
-        args.Query     = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
-
-        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
-        DGList.IndentJson = *True
-
-        Result = DGList.GetList()
-        json = DGList.ListAsJson
-        File.WriteAllText("c:\users\roger\documents\testing\TestDataServiceCountyByArgObject.json",json)
-
-        If (Result) 
-            // Success.
-        Else 
-            // An error occurred.
-        EndIf
-        Assert.IsTrue(Result)  
-        // There are 254 counties in Texas.
-        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(254))
-    EndSr 
-
-    BegSr TestCustomerForAutoComplete Attributes(TestMethod()) Access(*Public)
-        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
-        DclFld Result   Type(*Boolean)
-
-        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
-        DclFld Json     Type(*String)
-
-        args.library  = "examples"
-        args.file     = "cmastnewl2"
-        args.fields   = "cmname:label,cmcustno:value"
-        args.rows     = 12
-        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","Smi"))
-        args.QueryType = ASNA.Helpers.DataServices.QueryType.Simple
-        args.Query     = "CMNAME >= '{CMNAME}'" 
-
-        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
-        DGList.IndentJson = *True
-
-        Result = DGList.GetList()
-        json = DGList.ListAsJson
-        File.WriteAllText("c:\users\roger\documents\testing\TestCustomerForAutoComplete.json",json)
-
-        //db.Close() 
-
-        If (Result) 
-            // Success.
-        Else 
-            // An error occurred.
-        EndIf
-        Assert.IsTrue(Result)  
-        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
-    EndSr 
-
-    BegSr DeserializeJson Attributes(TestMethod()) Access(*Public)
-
-        // Json created with these lines:
-        //   Json = JsonConvert.SerializeObject(args)
-        //   File.WriteAllText("c:\users\roger\documents\testing\args.json",json)
-        DclFld Json Type(*String) 
-
-        Json = File.ReadAllText("c:\users\roger\documents\testing\args.json") 
-
-        DclFld args Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
-
-        // Note: That New() isn't sloppy! args must be instanced for the DeserializationObject method to work. 
-        args = JsonConvert.DeserializeObject(Json, args.GetType()) *As ASNA.Helpers.DataServices.QueryFileInstanceArgs
-    EndSr
+//
+//     
+//     BegSr CustomersWithSimpleQueryFirst Attributes(TestMethod()) Access(*Public)
+//        DclFld Parms    Type(Dictionary(*Of *String,*String)) New()
+//        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
+//        DclFld json     Type(*String)
+//        DclFld Result   Type(*Boolean) 
+//        
+//        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+//
+//        args.Library   = "examples"
+//        args.File      = "CmastNewL2"
+//        args.Fields    = "CMCUSTNO,CMNAME"
+//        args.Rows      = 12
+//        args.QueryType = ASNA.Helpers.DataServices.QueryType.Paged
+//        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","A"))
+//        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+//
+//        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
+//        DGList.IndentJson = *True
+//       
+//        Result = DGList.GetList()
+//
+//        json = DGList.ListAsJson
+//        json = json.Replace("\r\n",Environment.NewLine) 
+//        File.WriteAllText("c:\users\roger\documents\testing\CustomersWithSimpleQueryFirst.json",json)
+//
+//        If (Result) 
+//            // Success.
+//        Else 
+//            // An error occurred.
+//        EndIf
+//        Assert.IsTrue(Result)  
+//        Assert.AreEqual(DGList.ListAsDataTable.Columns.Count, Convert.ToInt32(2)) 
+//        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
+//    EndSr 
+//
+//   
+//    BegSr TestDataServiceCountyByArgObject Attributes(TestMethod()) Access(*Public)
+//        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
+//        DclFld Result   Type(*Boolean)
+//
+//        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+//        DclFld Json     Type(*String)
+//
+//        args.library  = "devo"
+//        args.file     = "county"
+//        args.fields   = "STATE:value,COUNTY:label"
+//        args.rows     = -1
+//        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("STATE","TX"))
+//        args.QueryFields.add(*New ASNA.Helpers.DataServices.QueryField("COUNTY","A"))
+//        //args.QueryType = ASNA.Helpers.DataServices.QueryType.Simple
+//        args.Query     = "STATE = '{STATE}' AND COUNTY >= '{COUNTY}'" 
+//
+//        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
+//        DGList.IndentJson = *True
+//
+//        Result = DGList.GetList()
+//        json = DGList.ListAsJson
+//        File.WriteAllText("c:\users\roger\documents\testing\TestDataServiceCountyByArgObject.json",json)
+//
+//        If (Result) 
+//            // Success.
+//        Else 
+//            // An error occurred.
+//        EndIf
+//        Assert.IsTrue(Result)  
+//        // There are 254 counties in Texas.
+//        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(254))
+//    EndSr 
+//
+//    BegSr TestCustomerForAutoComplete Attributes(TestMethod()) Access(*Public)
+//        DclFld DGList   Type(ASNA.Helpers.DataServices.QueryFile)
+//        DclFld Result   Type(*Boolean)
+//
+//        DclFld args     Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+//        DclFld Json     Type(*String)
+//
+//        args.library  = "examples"
+//        args.file     = "cmastnewl2"
+//        args.fields   = "cmname:label,cmcustno:value"
+//        args.rows     = 12
+//        args.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","Smi"))
+//        args.QueryType = ASNA.Helpers.DataServices.QueryType.Simple
+//        args.Query     = "CMNAME >= '{CMNAME}'" 
+//
+//        DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
+//        DGList.IndentJson = *True
+//
+//        Result = DGList.GetList()
+//        json = DGList.ListAsJson
+//        File.WriteAllText("c:\users\roger\documents\testing\TestCustomerForAutoComplete.json",json)
+//
+//        //db.Close() 
+//
+//        If (Result) 
+//            // Success.
+//        Else 
+//            // An error occurred.
+//        EndIf
+//        Assert.IsTrue(Result)  
+//        Assert.AreEqual(DGList.ResultRowCount,Convert.ToInt32(12))
+//    EndSr 
+//
+//    BegSr DeserializeJson Attributes(TestMethod()) Access(*Public)
+//
+//        // Json created with these lines:
+//        //   Json = JsonConvert.SerializeObject(args)
+//        //   File.WriteAllText("c:\users\roger\documents\testing\args.json",json)
+//        DclFld Json Type(*String) 
+//
+//        Json = File.ReadAllText("c:\users\roger\documents\testing\args.json") 
+//
+//        DclFld args Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+//
+//        // Note: That New() isn't sloppy! args must be instanced for the DeserializationObject method to work. 
+//        args = JsonConvert.DeserializeObject(Json, args.GetType()) *As ASNA.Helpers.DataServices.QueryFileInstanceArgs
+//    EndSr
 
 
 EndClass

@@ -1,0 +1,96 @@
+﻿Using System
+Using System.Text
+Using System.Data
+Using System.IO 
+Using NewtonSoft.Json
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
+
+    DclFld Args Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
+
+    BegConstructor Access(*Public)
+        DclSrParm Args Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
+        
+        *This.Args = Args        
+    EndConstructor
+
+    DclFld  _Result Type(*String) 
+    BegProp Result  Type(*Object) Implements(iQueryFileAdapter.Result) Access(*Public)
+        BegGet
+            LeaveSr _Result 
+        EndGet
+    EndProp 
+
+    BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+        _Result = GetJsonData(dt,Args)                  
+    EndSr
+
+    BegFunc GetJsonData Type(*String)
+        DclSrParm dt           Type(DataTable)
+        DclSrParm Args         Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
+
+        DclFld sb                   Type(StringBuilder) New()
+        DclFld sw                   Type(StringWriter) New(sb)
+        DclFld writer               Type(JsonWriter)
+
+        writer = *New JsonTextWriter(sw)
+        If (Args.IndentJson)
+            writer.Formatting = Formatting.Indented
+        Else
+            writer.Formatting = Formatting.None
+        EndIf
+        writer.WriteStartObject()
+        writer.WritePropertyName("resultRowCount")
+        writer.WriteValue(Args.ResultRowCount)
+        writer.WritePropertyName("milliseconds")
+        writer.WriteValue(Args.Milliseconds.ToString("#,##0")) 
+       
+        writer.WritePropertyName("list")
+        writer.WriteStartArray()      
+        ForEach dr Type(DataRow) Collection(dt.Rows)
+            writer.WriteStartObject()
+            ForEach Field Type(*String) Collection(Args.Fields) 
+                writer.WritePropertyName(Field)
+                writer.WriteValue(dr[Field].ToString().Trim()) 
+            EndFor
+            writer.WriteEndObject()
+        EndFor 
+        writer.WriteEndArray()
+
+        writer.WritePropertyName("startingKey")
+        writer.WriteStartArray()      
+
+        ForEach key Type(QueryField) Collection(Args.StartingKeys) 
+            writer.WriteStartObject()
+            writer.WritePropertyName(key.FieldName)
+            writer.WriteValue(key.FieldValue) 
+            writer.WriteEndObject() 
+        EndFor
+        writer.WriteEndArray()
+                
+        writer.WritePropertyName("endingKey")
+        writer.WriteStartArray()      
+        dr = dt.Rows[dt.Rows.Count-1] 
+        ForEach key Type(QueryField) Collection(Args.EndingKeys)
+            writer.WriteStartObject()
+            writer.WritePropertyName(key.FieldName)
+            writer.WriteValue(key.FieldValue) 
+            writer.WriteEndObject() 
+        EndFor
+        
+        writer.WriteEndArray()
+
+        writer.Close()
+
+        LeaveSr sb.ToString() 
+    EndFunc
+
+
+EndClass
+
+
+

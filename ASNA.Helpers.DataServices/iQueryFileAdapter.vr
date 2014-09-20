@@ -1,0 +1,16 @@
+﻿Using System
+Using System.Text
+Using System.Data
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegInterface iQueryFileAdapter
+    BegProp Result Type(*Object)
+        BegGet
+        EndGet
+    EndProp 
+
+    BegSr Render 
+        DclSrParm dt  Type(DataTable)
+    EndSr
+EndInterface

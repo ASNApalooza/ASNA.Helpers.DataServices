@@ -43,6 +43,10 @@
       <SubType>
       </SubType>
     </Compile>
+    <Compile Include="iQueryFileAdapter.vr">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="QueryFile.vr">
       <SubType>
       </SubType>
@@ -56,6 +60,14 @@
       </SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.vr" />
+    <Compile Include="ToDataTableAdapter.vr">
+      <SubType>
+      </SubType>
+    </Compile>
+    <Compile Include="ToJsonAdapter.vr">
+      <SubType>
+      </SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

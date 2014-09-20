@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestRun id="35a824ef-d5f1-4d08-b7cc-2a4e9c1afc44" name="Roger@RP-AVR-WINGS 2014-09-20 13:46:45" runUser="ASNAUS\Roger" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Default Test Settings" id="fa6e93d5-5d7c-4b80-846e-68407bc669f9">
+    <Execution>
+      <TestTypeSpecific />
+      <AgentRule name="Execution Agents">
+      </AgentRule>
+    </Execution>
+    <Deployment runDeploymentRoot="Roger_RP-AVR-WINGS 2014-09-20 13_46_45" />
+  </TestSettings>
+  <Times creation="2014-09-20T13:46:45.1132116-05:00" queuing="2014-09-20T13:46:46.2101228-05:00" start="2014-09-20T13:46:46.2951237-05:00" finish="2014-09-20T13:46:46.8235923-05:00" />
+  <ResultSummary outcome="Error">
+    <Counters total="1" executed="1" error="1" failed="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" passed="0" completed="0" inProgress="0" pending="0" />
+  </ResultSummary>
+  <TestDefinitions>
+    <UnitTest name="PagedQueryToDataTable" storage="dataservicestests.dll" id="e8663908-2558-6f1d-ff9f-dd012bd5ecba">
+      <Execution id="9260ae7d-d87d-4a74-95c4-b5dd9bab2d5c" />
+      <TestMethod codeBase="C:/rpDocuments/Programming/AVR/Other/ASNA.Helpers.DataServices/DataServicesTests/bin/Debug/dataservicestests.dll" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="DataServicesTests.Tests, DataServicesTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="PagedQueryToDataTable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <TestEntries>
+    <TestEntry testId="e8663908-2558-6f1d-ff9f-dd012bd5ecba" executionId="9260ae7d-d87d-4a74-95c4-b5dd9bab2d5c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <Results>
+    <UnitTestResult executionId="9260ae7d-d87d-4a74-95c4-b5dd9bab2d5c" testId="e8663908-2558-6f1d-ff9f-dd012bd5ecba" testName="PagedQueryToDataTable" computerName="RP-AVR-WINGS" startTime="2014-09-20T13:46:46.3890910-05:00" endTime="2014-09-20T13:46:46.7831459-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9260ae7d-d87d-4a74-95c4-b5dd9bab2d5c">
+      <Output>
+        <ErrorInfo>
+          <Message>Method DataServicesTests.Tests.OpenDB has wrong signature.  Parameter 1 should be of type Microsoft.VisualStudio.TestTools.UnitTesting.TestContext.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+</TestRun>

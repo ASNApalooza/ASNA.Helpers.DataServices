@@ -1,0 +1,22 @@
+﻿Using System
+Using System.Text
+Using System.Data
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass ToDataTableAdapter Implements(iQueryFileAdapter)  Access(*Public)
+    DclFld  _Result Type(DataTable) 
+    BegProp Result  Type(*Object) Implements(iQueryFileAdapter.Result) Access(*Public)
+        BegGet
+            LeaveSr _Result 
+        EndGet
+    EndProp 
+
+    BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+        If (Result = *Nothing)
+            _Result = dt
+        EndIf
+    EndSr
+EndClass
