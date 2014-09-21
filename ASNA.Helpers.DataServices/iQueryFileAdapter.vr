@@ -10,6 +10,18 @@ BegInterface iQueryFileAdapter
         EndGet
     EndProp 
 
+    BegSr Header
+        DclSrParm dt Type(DataTable)
+    EndSr
+
+    BegSr Row
+        DclSrParm dt Type(DataTable)
+    EndSr
+
+    BegSr Footer
+        DclSrParm dt Type(DataTable)
+    EndSr
+
     BegSr Render 
         DclSrParm dt  Type(DataTable)
     EndSr

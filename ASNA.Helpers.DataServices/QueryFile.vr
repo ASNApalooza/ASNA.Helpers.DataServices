@@ -86,12 +86,15 @@ BegClass QueryFile Access(*Public)
             x = ex.Message
         EndTry 
 
+        OutputAdapter.Header(DGDS.Tables[0])
         Do FromVal(1) ToVal(RecordsToRead) 
             EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
             If (EOF) 
                 Leave
             EndIf
+        OutputAdapter.Row(DGDS.Tables[0])
         EndDo 
+        OutputAdapter.Footer(DGDS.Tables[0])
     EndSr
 
     BegSr ReadRowsWithSimpleQuery
@@ -105,7 +108,7 @@ BegClass QueryFile Access(*Public)
         DclArray Keys        Type(*String) Rank(1)
         DclArray Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1)
 
-        QueryMask.Append(CheckQueryArgs(*This.Args.Query.ToUpper())) 
+        QueryMask.Append(CheckQueryArgs(*This.Args.Inputs.Query.ToUpper())) 
         CreateQueryDefinition(QueryMask)                 
         DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args.Inputs.QueryFields)
         
@@ -115,12 +118,16 @@ BegClass QueryFile Access(*Public)
         EOF = *False    
         Counter = 0 
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
+
+        OutputAdapter.Header(DGDS.Tables[0])
         DoWhile NOT DataGateAPI.ReadNextRecord(DGFile,DGDS)
             Counter += 1 
             If (Counter = RecordsToRead)
                 Leave
             EndIf
+            OutputAdapter.Row(DGDS.Tables[0])
         EndDo 
+        OutputAdapter.Footer(DGDS.Tables[0])
     EndSr
 
     BegFunc CheckQueryArgs Type(*String) 
@@ -163,29 +170,28 @@ BegClass QueryFile Access(*Public)
 
         dr = dt.Rows[0]         
         ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
-            *This.Args.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+            *This.Args.Outputs.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
         EndFor
 
         dr = dt.Rows[dt.Rows.Count-1] 
         ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
-            *This.Args.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+            *This.Args.Outputs.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
         EndFor
     EndSr
 
     BegFunc GetList Type(*Object) Access(*Public)
         DclFld timer                Type(StopWatch) New()
 
-        timer.Start()
-
         Try
-             *This.GetQueryRows(*This.Args.Inputs.Rows) 
-             DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
-             SetdBeginningAndEndKeys(DGDS.Tables[0])
-             timer.Stop()
-             *This.Args.ResultRowCount  = DGDS.Tables[0].Rows.Count 
-             *This.Args.ResultColCount  = DGDS.Tables[0].Columns.Count
-             *This.Args.Milliseconds    = timer.ElapsedMilliseconds
-             OutputAdapter.Render(DGDS.Tables[0])
+            timer.Start()
+            *This.GetQueryRows(*This.Args.Inputs.Rows) 
+            DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+            SetdBeginningAndEndKeys(DGDS.Tables[0])
+            timer.Stop()
+            *This.Args.Outputs.ResultRowCount  = DGDS.Tables[0].Rows.Count 
+            *This.Args.Outputs.ResultColCount  = DGDS.Tables[0].Columns.Count
+            *This.Args.Outputs.Milliseconds    = timer.ElapsedMilliseconds
+            OutputAdapter.Render(DGDS.Tables[0])
 
         Catch DGExcept Type(dgException)
             *This.Args.Error.ErrorMessage = DGExcept.Message

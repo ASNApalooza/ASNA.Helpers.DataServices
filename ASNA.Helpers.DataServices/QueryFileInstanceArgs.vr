@@ -6,21 +6,19 @@ DclNamespace ASNA.Helpers.DataServices
 
 BegClass QueryFileInstanceArgs Access(*Public)
 
-    DclFld Inputs Type(InputArgs) Access(*Public) New()
+    DclFld Inputs  Type(InputArgs)  Access(*Public) New()
+    DclFld Outputs Type(OutputArgs) Access(*Public) New()
+    DclFld Error   Type(ErrorInfo)  Access(*Public) New()
 
-    // Outputs 
-    DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
-    DclFld ResultColCount       Type(*Integer4) Access(*Public) 
-    DclFld Milliseconds         Type(*Integer4) Access(*Public)
-    DclFld StartingKeys         Type(List(*Of QueryField)) Access(*Public) New()
-    DclFld EndingKeys           Type(List(*Of QueryField)) Access(*Public) New()      
-    DclFld Query                Type(*String) Access(*Public)
-    DclFld JsonError            Type(*String) Access(*Public) 
-
-    DclFld Error Type(ErrorInfo) Access(*Public) New()
-
-    // Error Info 
-
+    BegClass OutputArgs Access(*Public) 
+        DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
+        DclFld ResultColCount       Type(*Integer4) Access(*Public) 
+        DclFld Milliseconds         Type(*Integer4) Access(*Public)
+        DclFld StartingKeys         Type(List(*Of QueryField)) Access(*Public) New()
+        DclFld EndingKeys           Type(List(*Of QueryField)) Access(*Public) New()      
+        DclFld Query                Type(*String) Access(*Public)
+        DclFld JsonError            Type(*String) Access(*Public) 
+    EndClass
 
     BegClass InputArgs Access(*Public) 
         // Inputs 
@@ -53,7 +51,6 @@ BegClass QueryFileInstanceArgs Access(*Public)
                 i += 1
             EndFor 
         EndSr    
-
     EndClass
 
     BegClass ErrorInfo Access(*Public)
@@ -63,6 +60,4 @@ BegClass QueryFileInstanceArgs Access(*Public)
         DclFld StackTrace      Type(*String) Access(*Public) 
         DclFld ErrorException  Type(System.Exception) Access(*Public) 
     EndClass
-
-
 EndClass

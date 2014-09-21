@@ -1,16 +1,36 @@
 ﻿Using System
 Using System.Text
 Using System.Data
+Using System.Collections
 
 DclNamespace ASNA.Helpers.DataServices
 
 BegClass ToDataTableAdapter Implements(iQueryFileAdapter)  Access(*Public)
+
     DclFld  _Result Type(DataTable) 
     BegProp Result  Type(*Object) Implements(iQueryFileAdapter.Result) Access(*Public)
         BegGet
             LeaveSr _Result 
         EndGet
     EndProp 
+
+    BegConstructor Access(*Public)
+    EndConstructor 
+
+    BegSr Header Implements(iQueryFileAdapter.Header) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
+
+    BegSr Row Implements(iQueryFileAdapter.Row) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
+
+    BegSr Footer Implements(iQueryFileAdapter.Footer) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
 
     BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
         DclSrParm dt Type(DataTable)

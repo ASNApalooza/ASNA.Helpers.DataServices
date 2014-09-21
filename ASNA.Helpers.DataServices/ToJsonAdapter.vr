@@ -16,12 +16,30 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
         *This.Args = Args        
     EndConstructor
 
+    BegConstructor Access(*Public)
+    EndConstructor 
+
     DclFld  _Result Type(*String) 
     BegProp Result  Type(*Object) Implements(iQueryFileAdapter.Result) Access(*Public)
         BegGet
             LeaveSr _Result 
         EndGet
     EndProp 
+
+    BegSr Header Implements(iQueryFileAdapter.Header) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
+
+    BegSr Row Implements(iQueryFileAdapter.Row) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
+
+    BegSr Footer Implements(iQueryFileAdapter.Footer) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
 
     BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
         DclSrParm dt Type(DataTable)
@@ -45,9 +63,9 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
         EndIf
         writer.WriteStartObject()
         writer.WritePropertyName("resultRowCount")
-        writer.WriteValue(Args.ResultRowCount)
+        writer.WriteValue(Args.Outputs.ResultRowCount)
         writer.WritePropertyName("milliseconds")
-        writer.WriteValue(Args.Milliseconds.ToString("#,##0")) 
+        writer.WriteValue(Args.Outputs.Milliseconds.ToString("#,##0")) 
        
         writer.WritePropertyName("list")
         writer.WriteStartArray()      
@@ -64,7 +82,7 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
         writer.WritePropertyName("startingKey")
         writer.WriteStartArray()      
 
-        ForEach key Type(QueryField) Collection(Args.StartingKeys) 
+        ForEach key Type(QueryField) Collection(Args.Outputs.StartingKeys) 
             writer.WriteStartObject()
             writer.WritePropertyName(key.FieldName)
             writer.WriteValue(key.FieldValue) 
@@ -75,7 +93,7 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
         writer.WritePropertyName("endingKey")
         writer.WriteStartArray()      
         dr = dt.Rows[dt.Rows.Count-1] 
-        ForEach key Type(QueryField) Collection(Args.EndingKeys)
+        ForEach key Type(QueryField) Collection(Args.Outputs.EndingKeys)
             writer.WriteStartObject()
             writer.WritePropertyName(key.FieldName)
             writer.WriteValue(key.FieldValue) 
