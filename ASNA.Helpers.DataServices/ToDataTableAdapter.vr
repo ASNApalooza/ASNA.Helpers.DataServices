@@ -40,3 +40,4 @@ BegClass ToDataTableAdapter Implements(iQueryFileAdapter)  Access(*Public)
         EndIf
     EndSr
 EndClass
+

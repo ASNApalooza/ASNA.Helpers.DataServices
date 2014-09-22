@@ -37,7 +37,7 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDB = DGDB
         *This.Args = Args
-        *This.Args.Inputs.Initialize()
+        *This.Args.Initialize()
 
         If ( OutputAdapter = *Nothing)            
             *This.OutputAdapter = *New ToDataTableAdapter()

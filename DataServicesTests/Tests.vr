@@ -51,6 +51,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Args.Inputs.Rows         = 12
         Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Initialize()
                 
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
         dt = DGList.GetList() *As DataTable
@@ -75,6 +76,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Args.Inputs.Rows         = 12
         Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Initialize()
                 
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args)
         dt = DGList.GetList() *As DataTable
@@ -106,6 +108,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Args.Inputs.IndentJson   = *True 
         Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Args.Initialize()
                 
         JsonAdapter = *New ASNA.Helpers.DataServices.ToJsonAdapter(Args) 
         DGList = *New ASNA.Helpers.DataServices.QueryFile(Tests.db,args,JsonAdapter)
