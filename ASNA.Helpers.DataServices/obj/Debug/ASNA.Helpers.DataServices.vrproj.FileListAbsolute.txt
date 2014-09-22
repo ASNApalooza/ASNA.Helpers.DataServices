@@ -8,3 +8,4 @@ C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.Data
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\ClosedXML.dll
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\DocumentFormat.OpenXml.dll
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\ClosedXML.xml
+C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.vrprojResolveAssemblyReference.cache

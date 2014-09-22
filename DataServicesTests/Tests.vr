@@ -9,7 +9,7 @@ Using ASNA.DataGate.Client
 Using NewtonSoft.Json
 Using System.Diagnostics
 Using ClosedXMl.Excel
-
+Using System.Web.UI.WebControls 
 
 // Set reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework
 
@@ -86,7 +86,8 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         Args.Inputs.Library      = "examples"
         Args.Inputs.File         = "CmastNewL1"
-        Args.Inputs.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
+        // Args.Inputs.FieldsList   = "CMCUSTNO:roger,CMNAME : pence,CMADDR1 :colleen,CMCITY,CMSTATE,CMPOSTCODE"
+        Args.Inputs.FieldsList   = "CMCUSTNO : value,CMNAME   :label     "
         Args.Inputs.Rows         = 12
         Args.Inputs.Options.Add("indentJson", *True) 
 
@@ -167,6 +168,34 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         Assert.IsTrue(File.Exists(EXCEL_FILE)) 
     EndSr
+
+    BegSr ExportListItemArray Attributes(TestMethod()) Access(*Public)
+        DclFld DGList       Type(ASNA.Helpers.DataServices.QueryFile)
+        DclFld Args         Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFLd Options      TYpe(Dictionary(*of *String, *Object)) New()
+        DclFld ToListItemArrayAdapter Type(ASNA.Helpers.DataServices.ToLisItemArrayAdapter) 
+
+        DclArray ListItems    Type(ListItem) Rank(1)
+
+        args.Inputs.Library    = "devo"
+        args.Inputs.File       = "States"
+        args.Inputs.FieldsList = "State:text,Abbrev:value"
+        args.Inputs.Rows       = 1000
+        args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
+        args.Inputs.Query      = "STATE >= 'A'"
+        args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("STATE",""))
+
+        ToListItemArrayAdapter = *New ASNA.Helpers.DataServices.ToLisItemArrayAdapter(Args)        
+        DGList = *New ASNA.Helpers.DataServices.QueryFile(db,args,ToListItemArrayAdapter)
+        ListItems = DGList.GetList() *As ListItem[]
+        If (Args.Error.ErrorException = *Nothing)
+            Assert.AreEqual(ListItems.Length,Convert.ToInt32(59))
+        Else 
+            Assert.Fail(Args.Error.ErrorMessage)
+        EndIf 
+
+    EndSr
+
 
 
 //

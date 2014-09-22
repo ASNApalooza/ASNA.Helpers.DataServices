@@ -202,7 +202,7 @@ BegClass QueryFile Access(*Public)
             *This.Args.Error.ErrorException = Except
 
         Catch Except Type(System.Exception) 
-            *This.Args.Error.ErrorMessage = DGExcept.Message
+            *This.Args.Error.ErrorMessage = Except.Message
             *This.Args.Error.ErrorNumber  = "No error number"
             *This.Args.Error.SystemError  = "No system error"
             *This.Args.Error.ErrorException = Except

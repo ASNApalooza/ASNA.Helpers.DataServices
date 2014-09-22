@@ -73,9 +73,9 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
         writer.WriteStartArray()      
         ForEach dr Type(DataRow) Collection(dt.Rows)
             writer.WriteStartObject()
-            ForEach Field Type(*String) Collection(Args.Inputs.Fields) 
-                writer.WritePropertyName(Field)
-                writer.WriteValue(dr[Field].ToString().Trim()) 
+            ForEach FieldName Type(*String) Collection(Args.Inputs.Fields) 
+                writer.WritePropertyName(Args.Inputs.GetCorrespondingFieldAlias(FieldName))
+                writer.WriteValue(dr[FieldName].ToString().Trim()) 
             EndFor
             writer.WriteEndObject()
         EndFor 

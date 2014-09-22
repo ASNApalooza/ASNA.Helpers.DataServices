@@ -59,7 +59,33 @@ BegClass QueryFileInstanceArgs Access(*Public)
                 i += 1
             EndFor 
         EndSr    
-    EndClass
+
+        BegFunc GetCorrespondingFieldAlias Type(*String) Access(*Public) 
+            DclSrParm FieldName Type(*String) 
+
+            DclFLd i Type(*Integer4) 
+
+            i = System.Array.IndexOf(*This.Fields,FieldName.ToLower())
+            If ( i > -1 )
+                LeaveSr *This.FieldAliases[i]
+            Else
+                LeaveSr FieldName
+            EndIf 
+        EndFunc 
+
+        BegFunc GetCorrespondingField Type(*String) Access(*Public) 
+            DclSrParm FieldNameAlias Type(*String) 
+
+            DclFLd i Type(*Integer4) 
+
+            i = System.Array.IndexOf(*This.FieldAliases,FieldNameAlias)
+            If ( i > -1 )
+                LeaveSr *This.Fields[i]
+            Else
+                LeaveSr FieldNameAlias
+            EndIf 
+        EndFunc 
+    EndClass     
 
     BegClass ErrorInfo Access(*Public)
         DclFld ErrorMessage    Type(*String) Access(*Public) 

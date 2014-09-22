@@ -1,0 +1,78 @@
+﻿Using System
+Using System.Data 
+Using System.Web.UI.WebControls 
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass  ToLisItemArrayAdapter Implements(iQueryFileAdapter)  Access(*Public)
+
+    DclFld Args Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
+
+    DclFld    _Result Type(*Object)
+    BegProp   Result Type(*Object) Implements(iQueryFileAdapter.Result)  Access(*Public)
+        BegGet
+            LeaveSr _Result 
+        EndGet
+    EndProp 
+
+    BegConstructor Access(*Public)
+        DclSrParm Args Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
+        
+        *This.Args = Args        
+    EndConstructor
+
+    BegSr Header Implements(iQueryFileAdapter.Header) Access(*Public)
+        DclSrParm dt Type(DataTable) 
+    EndSr
+
+    BegSr Row Implements(iQueryFileAdapter.Row) Access(*Public)
+        DclSrParm dt Type(DataTable)
+    EndSr
+
+    BegSr Footer Implements(iQueryFileAdapter.Footer) Access(*Public)
+        DclSrParm dt Type(DataTable)
+    EndSr
+
+    BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)  
+        DclSrParm dt  Type(DataTable)
+
+        GetListItemArray(dt)
+    EndSr
+
+    BegSr GetListItemArray 
+        DclSrParm dt           Type(DataTable)
+
+        DclArray  ListItems  Type(ListItem) Rank(1)
+
+        DclFld    Text        Type(*String)
+        DclFld    Value       Type(*String)
+        DclFld    FieldAlias  Type(*String)
+        DclFld    FieldName   Type(*String)
+        DclFld    i           Type(*Integer4) 
+
+        ListItems = *New ListItem[dt.Rows.Count] 
+
+        ForEach dr Type(DataRow) Collection(dt.Rows)
+            ForEach Col Type( DataColumn ) Collection(dt.Columns) 
+                FieldName   = Col.ColumnName 
+                FieldAlias  = *This.Args.Inputs.GetCorrespondingFieldAlias(FieldName) 
+                If (FieldAlias.ToLower() = "text")
+                    Text = dr[FieldName].ToString().Trim() 
+                EndIf
+                If (FieldAlias.ToLower() = "value")
+                    Value = dr[FieldName].ToString().Trim() 
+                EndIf
+            EndFor   
+            If (String.IsNullOrEmpty(Text) OR String.IsNullOrEmpty(Value)) 
+                Throw *New ArgumentException(String.Format("'text' or 'value' alias not provided for ListItem for file '{0}'",Args.Inputs.File)) 
+            EndIf 
+            ListItems[i] = *New ListItem(Text,Value)
+            Text = *Nothing
+            Value = *Nothing
+            i += 1
+        EndFor 
+
+        *This._Result = ListItems
+    EndSr
+
+EndClass
