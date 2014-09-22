@@ -24,7 +24,7 @@ BegClass QueryFileInstanceArgs Access(*Public)
         ForEach Field Type(*String) Collection(FieldsAsSpecified) 
             FieldNameTokens = DataGateAPI.GetFieldNameTokens(Field) 
             Inputs.Fields[i] = FieldNameTokens[0].ToLower()
-            Inputs.FieldAliases[i] = FieldNameTokens[1].ToLower()             
+            Inputs.FieldAliases[i] = FieldNameTokens[1]
             i += 1
         EndFor 
     EndSr    

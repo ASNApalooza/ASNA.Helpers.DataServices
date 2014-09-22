@@ -1,0 +1,126 @@
+﻿Using System
+Using System.Data 
+Using System.Collections.Generic 
+Using System.Text
+using DocumentFormat.OpenXml
+Using DocumentFormat.OpenXml.Spreadsheet
+//Using SpreadsheetLight
+Using ClosedXMl.Excel
+Using ASNA.Helpers.DataServices
+
+DclNamespace ASNA.Helpers.Excel
+
+BegClass Export Access(*Public) Implements(iQueryFileAdapter)  
+
+    BegProp Result  Type(*Object) Implements(iQueryFileAdapter.Result) Access(*Public)
+        BegGet
+            LeaveSr wb
+        EndGet
+    EndProp 
+
+    DclFLd args         Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs)
+    DclFLd dt           Type(DataTable)
+    DclFLd HeadingText  Type(*String)  
+    DclFld wb           Type(XLWorkBook) New()
+    DclFld ws           Type(iXLWorkSheet)
+    DclFld Options      TYpe(Dictionary(*of *String, *Object)) New()
+
+    DclConst HEADING_ROW Value(3)
+
+    BegConstructor Access(*Public)
+        DclSrParm args        Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs)
+        DclSrParm Options     Type(Dictionary(*of *String, *Object)) 
+
+        *This.Options = Options 
+        *This.args = args
+    EndConstructor 
+
+    BegSr Header Implements(iQueryFileAdapter.Header) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+        DclFld Col  Type(*Integer4) 
+        DclFld Row  Type(*Integer4)
+
+        If (*This.dt = *Nothing)
+            *This.dt = dt
+        EndIf
+
+        ws = wb.Worksheets.Add(Options["worksheetName"].ToString())
+        ws.Cell(1,1).Value = Options["heading"].ToString()
+        ws.Cell(1,1).Style.Font.Bold = *True 
+        ws.Cell(1,1).Style.Font.SetFontSize(14) 
+
+        Row = HEADING_ROW
+
+        ForEach Field Type(*String) Collection(args.Inputs.FieldAliases) 
+            ws.Cell(Row,Col+1).Style.Font.Bold = *True 
+            ws.Cell(Row,Col+1).Style.Border.TopBorder = XLBorderStyleValues.Medium
+            ws.Cell(Row,Col+1).Style.Border.BottomBorder = XLBorderStyleValues.Medium
+            ws.Cell(Row,Col+1).Value = Field 
+            Col += 1
+        EndFor 
+    EndSr
+
+    BegSr Row Implements(iQueryFileAdapter.Row) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
+
+    BegSr Footer Implements(iQueryFileAdapter.Footer) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+    EndSr
+
+    BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
+        DclSrParm dt Type(DataTable)
+
+
+        WriteDataTableRows(ws,dt)            
+    EndSr
+
+    BegSr SaveToLocalFile Access(*Public) 
+        DclSrParm FullFileName Type(*String) 
+
+        wb.SaveAs(FullFileName)
+    EndSr
+
+    BegSr WriteDataTableRows
+        DclSrParm ws   Type(IXLWorkSheet) 
+        DclSrParm dt   Type(DataTable) 
+
+        DclFld   Col   Type(*Integer4) 
+        DclFld   Row   Type(*Integer4) 
+        DclFld   x     Type(*Integer4) 
+
+        DclArray ColWidth    Type(*Integer4) Rank(1)
+        ColWidth = *New *Integer4[dt.Columns.Count]
+
+        Row = HEADING_ROW + 1
+        Col = 1
+
+        ForEach dr Type(DataRow) Collection(dt.Rows) 
+            ForEach Column Type(DataColumn) Collection(dt.Columns) 
+                If (dr[Column.ColumnName].ToString().Trim().Length() > ColWidth[Col-1]) 
+                    ColWidth[Col-1] = dr[Column.ColumnName].ToString().Trim().Length()
+                EndIf
+                If (Column.DataType.FullName = "System.String") 
+                    ws.Cell(Row, Col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left 
+                EndIf 
+                If (Column.DataType.FullName = "System.Decimal") 
+                    ws.Cell(Row, Col).Value = Convert.ToDecimal(dr[Column.ColumnName].ToString())
+                Else 
+                    ws.Cell(Row, Col).Value = dr[Column.ColumnName].ToString()
+                EndIf 
+                Col += 1 
+            EndFor        
+            Col = 1
+            Row += 1
+        EndFor 
+
+        For Index(x = 0) To(dt.Columns.Count -1)
+            If (ColWidth[x] > 0 ) 
+                ws.Column(x+1).Width = ColWidth[x] + 5
+            EndIf 
+        EndFor 
+    EndSr
+EndClass

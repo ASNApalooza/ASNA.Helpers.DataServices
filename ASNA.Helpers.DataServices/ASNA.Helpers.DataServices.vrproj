@@ -31,6 +31,12 @@
   <ItemGroup>
     <Reference Include="ASNA.DataGate.Client" />
     <Reference Include="ASNA.VisualRPG.Runtime" />
+    <Reference Include="ClosedXML">
+      <HintPath>..\..\..\..\..\..\tools\ClosedXML\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml">
+      <HintPath>..\..\ASNA.Helpers.Excel\ASNA.Helpers.Excel\bin\Debug\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\NavigationService\NavigationService\bin\Debug\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -61,6 +67,10 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.vr" />
     <Compile Include="ToDataTableAdapter.vr">
+      <SubType>
+      </SubType>
+    </Compile>
+    <Compile Include="ToExcelAdapter.vr">
       <SubType>
       </SubType>
     </Compile>

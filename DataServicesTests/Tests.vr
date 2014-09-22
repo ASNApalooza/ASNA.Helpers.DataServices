@@ -1,12 +1,15 @@
 ﻿Using System
 Using System.Text
 Using System.Data
+Using System.Collections 
 Using System.Collections.Generic
 Using Microsoft.VisualStudio.TestTools.UnitTesting
 Using System.IO 
 Using ASNA.DataGate.Client
 Using NewtonSoft.Json
 Using System.Diagnostics
+Using ClosedXMl.Excel
+
 
 // Set reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework
 
@@ -127,6 +130,48 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 //        Assert.IsTrue(Result)  
           //Assert.AreEqual(dt.Rows.Count, Args.Rows) 
     EndSr 
+
+    BegSr ExportToExcel Attributes(TestMethod()) Access(*Public)
+        DclFld DGList       Type(ASNA.Helpers.DataServices.QueryFile)
+        DclFld Args         Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) New()
+        DclFld dt           Type(System.Data.DataTable) 
+        //DclFld wb           Type(XLWorkbook) 
+        DclFLd Options      TYpe(Dictionary(*of *String, *Object)) New()
+        DclFld ArgsJson     Type(*String) 
+        DclFld ExcelAdapter Type(ASNA.Helpers.Excel.Export)
+
+        DclConst EXCEL_FILE Value("C:\Users\Roger\Documents\testing\roger.xlsx")
+
+        
+        Options.Add("heading","Customer Listing")
+        Options.Add("worksheetName","Customers")
+
+        args.Inputs.Library    = "examples"
+        args.Inputs.File       = "CmastNewL1"
+        args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:Address,CMCITY:City,CMSTATE:State,CMPOSTCODE:Zip code"
+        args.Inputs.Rows       = 12
+        args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Paged
+        args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        args.Initialize()
+
+        ExcelAdapter = *New ASNA.Helpers.Excel.Export(args,Options)
+        DGList = *New ASNA.Helpers.DataServices.QueryFile(db,args,ExcelAdapter)
+
+// If the client needs to save the spreadsheet...
+//        wb = DGList.GetList() *As XLWorkbook
+//        wb.SaveAs(EXCEL_FILE)
+
+        File.Delete(EXCEL_FILE)
+
+        DGList.GetList() 
+        ExcelAdapter.SaveToLocalFile(EXCEL_FILE)
+
+        ArgsJson = JsonConvert.SerializeObject(Args,Formatting.Indented)
+        File.WriteAllText("c:\users\roger\documents\testing\Excel-args.json",ArgsJson)
+
+        Assert.IsTrue(File.Exists(EXCEL_FILE)) 
+    EndSr
+
 
 //
 //     
