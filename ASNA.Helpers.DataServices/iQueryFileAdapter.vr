@@ -16,6 +16,26 @@ BegInterface iQueryFileAdapter
 
     BegSr Row
         DclSrParm dt Type(DataTable)
+        // If you access rows here, _all_ columns in the datatable are available here. 
+        // Unselected columns are not removed until the datatable has been fully filled. 
+
+        // To process selected columns only in this routine, use this code:
+
+        //        DclFld   Col   Type(*Integer4) 
+        //        DclFld   Row   Type(*Integer4) 
+        //
+        //        Col = 1
+        //
+        //        ForEach dr Type(DataRow) Collection(dt.Rows) 
+        //            ForEach Column Type(DataColumn) Collection(dt.Columns) 
+        //                If ( System.Array.IndexOf(Args.Inputs.Fields,Column.ColumnName.ToLower()) > -1) 
+        //                    // Do something with selected columns here.
+        //                    Col += 1 
+        //                EndIf
+        //            EndFor        
+        //            Col = 1
+        //            CurrentRow += 1
+        //        EndFor 
     EndSr
 
     BegSr Footer

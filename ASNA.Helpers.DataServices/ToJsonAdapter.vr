@@ -56,11 +56,13 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
         DclFld writer               Type(JsonWriter)
 
         writer = *New JsonTextWriter(sw)
-        If (Args.Inputs.IndentJson)
-            writer.Formatting = Formatting.Indented
-        Else
-            writer.Formatting = Formatting.None
+        If (Args.Inputs.Options.ContainsKey("indentJson")) 
+            writer.Formatting = Args.Inputs.Options["indentJson"] *As *Boolean
         EndIf
+//            writer.Formatting = Formatting.Indented
+//        Else
+//            writer.Formatting = Formatting.None
+//        EndIf
         writer.WriteStartObject()
         writer.WritePropertyName("resultRowCount")
         writer.WriteValue(Args.Outputs.ResultRowCount)

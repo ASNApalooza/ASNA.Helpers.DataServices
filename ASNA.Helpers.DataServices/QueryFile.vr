@@ -37,7 +37,7 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDB = DGDB
         *This.Args = Args
-        *This.Args.Initialize()
+        //*This.Args.Initialize()
 
         If ( OutputAdapter = *Nothing)            
             *This.OutputAdapter = *New ToDataTableAdapter()
@@ -92,7 +92,7 @@ BegClass QueryFile Access(*Public)
             If (EOF) 
                 Leave
             EndIf
-        OutputAdapter.Row(DGDS.Tables[0])
+            OutputAdapter.Row(DGDS.Tables[0])
         EndDo 
         OutputAdapter.Footer(DGDS.Tables[0])
     EndSr
@@ -168,15 +168,16 @@ BegClass QueryFile Access(*Public)
 
         DclFld dr  Type(DataRow)         
 
-        dr = dt.Rows[0]         
-        ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
-            *This.Args.Outputs.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
-        EndFor
-
-        dr = dt.Rows[dt.Rows.Count-1] 
-        ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
-            *This.Args.Outputs.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
-        EndFor
+        If (dt.Rows.Count > 0) 
+            dr = dt.Rows[0]         
+            ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
+                *This.Args.Outputs.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+            EndFor
+            dr = dt.Rows[dt.Rows.Count-1] 
+            ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
+                *This.Args.Outputs.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
+            EndFor
+        EndIf 
     EndSr
 
     BegFunc GetList Type(*Object) Access(*Public)

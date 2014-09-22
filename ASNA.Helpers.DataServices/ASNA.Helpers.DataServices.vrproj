@@ -74,6 +74,10 @@
       <SubType>
       </SubType>
     </Compile>
+    <Compile Include="ToExcelAdapter2.vr">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="ToJsonAdapter.vr">
       <SubType>
       </SubType>

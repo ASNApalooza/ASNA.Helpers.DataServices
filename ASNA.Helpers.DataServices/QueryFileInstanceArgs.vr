@@ -10,26 +10,6 @@ BegClass QueryFileInstanceArgs Access(*Public)
     DclFld Outputs Type(OutputArgs) Access(*Public) New()
     DclFld Error   Type(ErrorInfo)  Access(*Public) New()
 
-    BegSr Initialize Access(*Public) 
-        DclFld   i                  Type(*Integer4) 
-        DclArray FieldNameTokens    Type(*String) Rank(1) 
-        DclArray FieldsAsSpecified  Type(*String) Rank(1) 
-
-        FieldsAsSpecified = DataGateAPI.ParseCommaDelimitedStringIntoArray(*This.Inputs.FieldsList)
-
-        *This.Inputs.Fields = *New *String[FieldsAsSpecified.Length]
-        *This.Inputs.FieldAliases = *New *String[FieldsAsSpecified.Length]
-
-        i = 0
-        ForEach Field Type(*String) Collection(FieldsAsSpecified) 
-            FieldNameTokens = DataGateAPI.GetFieldNameTokens(Field) 
-            Inputs.Fields[i] = FieldNameTokens[0].ToLower()
-            Inputs.FieldAliases[i] = FieldNameTokens[1]
-            i += 1
-        EndFor 
-    EndSr    
-
-
     BegClass OutputArgs Access(*Public) 
         DclFld ResultRowCount       Type(*Integer4) Access(*Public) 
         DclFld ResultColCount       Type(*Integer4) Access(*Public) 
@@ -41,17 +21,44 @@ BegClass QueryFileInstanceArgs Access(*Public)
     EndClass
 
     BegClass InputArgs Access(*Public) 
-        // Inputs 
         DclFld Library      Type(*String) Access(*Public) 
         DclFld File         Type(*String) Access(*Public) 
-        DclFld FieldsList   Type(*String) Access(*Public) 
+        DclFld _FieldsList   Type(*String) 
+            BegProp FieldsList   Type(*String) Access(*Public) 
+                BegSet
+                    _FieldsList = *PropVal 
+                    InitializeFieldsList()
+                EndSet
+                BegGet
+                    LeaveSr _FieldsList                
+                EndGet
+            EndProp
         DclFld Rows         Type(*Integer4) Access(*Public) 
         DclFld Query        Type(*String) Access(*Public) 
         DclFld QueryType    Type(ASNA.Helpers.DataServices.QueryType) Inz(ASNA.Helpers.DataServices.QueryType.Simple) Access(*Public)
         DclFld QueryFields  Type(List(*Of QueryField)) Access(*Public) New()
-        DclFld IndentJson   Type(*Boolean) Access(*Public) 
         DclArray Fields         Type(*String) Rank(1) Access(*Public)
         DclArray FieldAliases   Type(*String) Rank(1) Access(*Public)
+        DclFLd Options      TYpe(Dictionary(*of *String, *Object)) New() Access(*Public)
+
+        BegSr InitializeFieldsList 
+            DclFld   i                  Type(*Integer4) 
+            DclArray FieldNameTokens    Type(*String) Rank(1) 
+            DclArray FieldsAsSpecified  Type(*String) Rank(1) 
+
+            FieldsAsSpecified = DataGateAPI.ParseCommaDelimitedStringIntoArray(*This.FieldsList)
+
+            *This.Fields = *New *String[FieldsAsSpecified.Length]
+            *This.FieldAliases = *New *String[FieldsAsSpecified.Length]
+
+            i = 0
+            ForEach Field Type(*String) Collection(FieldsAsSpecified) 
+                FieldNameTokens = DataGateAPI.GetFieldNameTokens(Field) 
+                Fields[i] = FieldNameTokens[0].ToLower()
+                FieldAliases[i] = FieldNameTokens[1]
+                i += 1
+            EndFor 
+        EndSr    
     EndClass
 
     BegClass ErrorInfo Access(*Public)
