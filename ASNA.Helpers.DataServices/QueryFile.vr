@@ -183,7 +183,12 @@ BegClass QueryFile Access(*Public)
     BegFunc Exec Type(*Object) Access(*Public)
         DclFld timer                Type(StopWatch) New()
 
+
         Try
+//            If (*This.DGDB.State <> ConnectionState.Open)
+//                *This.DGDB.Open() 
+//            EndIf
+
             timer.Start()
             *This.GetQueryRows(*This.Args.Inputs.Rows) 
             DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
@@ -199,7 +204,7 @@ BegClass QueryFile Access(*Public)
             *This.Args.Error.ErrorNumber  = DGExcept.Error.ToString()
             *This.Args.Error.SystemError  = DGExcept.SystemError.ToString() 
             *This.Args.Error.StackTrace   = DGExcept.StackTrace
-            *This.Args.Error.ErrorException = Except
+            *This.Args.Error.ErrorException = DGExcept 
 
         Catch Except Type(System.Exception) 
             *This.Args.Error.ErrorMessage = Except.Message

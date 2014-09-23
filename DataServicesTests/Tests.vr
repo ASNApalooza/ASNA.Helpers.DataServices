@@ -25,6 +25,16 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
     DclFld db       Type(AdgConnection) Shared(*Yes)
 
+    DclFld CurrentOrderBy Type(*Integer4)
+    DclFld CMNameValue   Type(*String)
+    DclFld CMCustNoValue Type(*Integer4) 
+
+    BegEnum OrderBy 
+        DclEnumFld Name
+        DclENumFld Number
+    EndEnum
+
+
     BegSr OpenDB Access(*Public) Attributes(ClassInitialize()) Shared(*Yes)
         DclSrParm context Type(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext)
 
@@ -145,5 +155,48 @@ BegClass Tests Access(*Public) Attributes(TestClass())
             Assert.Fail(Query.Args.Error.ErrorMessage)
         EndIf 
     EndSr
+
+    BegSr LoadGrid  Attributes(TestMethod()) Access(*Public)
+        DclFld DGDB     Type(AdgConnection) 
+        DclFld Query    Type(ASNA.Helpers.DataServices.QueryDriver) 
+
+//        DGDB = *New AdgConnection(*This.DBNAME)
+        DGDB = *New AdgConnection("*Public/Cypress")
+
+        Query = *New ASNA.Helpers.DataServices.QueryDriver(DGDB) 
+        ConfigureDataList(Query)
+
+        DclFld dt Type(DataTable)
+        DclFld x  Type(*Integer4) 
+
+        dt = Query.Exec() *As DataTable
+        Assert.AreEqual(dt.Rows.Count, Query.Args.Inputs.Rows) 
+
+
+        If (Query.Args.Error.ErrorException = *Nothing)
+            x = 6
+        Else 
+            x = 5
+        EndIf 
+    EndSr 
+
+    BegSr ConfigureDataList
+        DclSrParm Query     Type(ASNA.Helpers.DataServices.QueryDriver)
+
+        Query.Args.Inputs.Library      = "examples"
+        Query.Args.Inputs.File         = "CmastNewL2"
+        Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME"
+        Query.Args.Inputs.Rows         = 12
+        Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+
+        If (CurrentOrderBy = OrderBy.Name) 
+            Query.Args.Inputs.File      = "CmastNewL2"
+            Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME",*This.CMNameValue))
+            Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",*This.CMCustNoValue))
+        ElseIf (CurrentOrderBy = OrderBy.Number)
+            Query.Args.Inputs.File      = "CmastNewL1"        
+            Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",*This.CMCustNoValue))        
+        EndIf             
+    EndSr 
 
 EndClass
