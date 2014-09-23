@@ -180,7 +180,7 @@ BegClass QueryFile Access(*Public)
         EndIf 
     EndSr
 
-    BegFunc GetList Type(*Object) Access(*Public)
+    BegFunc Exec Type(*Object) Access(*Public)
         DclFld timer                Type(StopWatch) New()
 
         Try

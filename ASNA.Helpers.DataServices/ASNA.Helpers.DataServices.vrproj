@@ -57,6 +57,10 @@
       <SubType>
       </SubType>
     </Compile>
+    <Compile Include="QueryDriver.vr">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="QueryFile.vr">
       <SubType>
       </SubType>
@@ -74,11 +78,11 @@
       <SubType>
       </SubType>
     </Compile>
-    <Compile Include="ToExcelAdapter.vr">
+    <Compile Include="ToExcelAdapter.original.vr">
       <SubType>
       </SubType>
     </Compile>
-    <Compile Include="ToExcelAdapter2.vr">
+    <Compile Include="ToExcelAdapter.vr">
       <SubType>
       </SubType>
     </Compile>

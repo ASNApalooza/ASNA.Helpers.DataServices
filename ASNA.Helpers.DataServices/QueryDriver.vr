@@ -1,0 +1,29 @@
+﻿Using System
+Using System.Text
+Using ASNA.Helpers.DataServices
+Using ASNA.DataGate.Client
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass QueryDriver Access(*Public)
+    DclFld Args    Type(QueryFileInstanceArgs) Access(*Public) New()
+    DclFld Query   Type(QueryFile) 
+    DclFld DB      Type(AdgConnection)
+
+    BegConstructor Access(*Public) 
+        DclSrParm DB Type(AdgConnection)     
+
+        *This.DB = DB
+        *This.Query = *New QueryFile(DB,Args)
+    EndConstructor
+
+    BegSr OverrideAdapter Access(*Public) 
+        DclSrParm Adapter Type(iQueryFileAdapter) 
+
+        *This.Query = *New QueryFile(DB,Args,Adapter)
+    EndSr
+
+    BegFunc Exec Type(*Object) Access(*Public) 
+        LeaveSr *This.Query.Exec() 
+    EndFunc 
+EndClass

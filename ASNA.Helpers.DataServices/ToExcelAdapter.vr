@@ -8,9 +8,9 @@ Using ClosedXMl.Excel
 Using ASNA.Helpers.DataServices
 Using System.Diagnostics
 
-DclNamespace ASNA.Helpers.Excel
+DclNamespace ASNA.Helpers.DataServices
 
-BegClass Export Access(*Public) Implements(iQueryFileAdapter)  
+BegClass ToExcelAdapter Access(*Public) Implements(iQueryFileAdapter)  
 
     BegProp Result  Type(*Object) Implements(iQueryFileAdapter.Result) Access(*Public)
         BegGet
@@ -23,6 +23,9 @@ BegClass Export Access(*Public) Implements(iQueryFileAdapter)
     DclFld wb           Type(XLWorkBook) New()
     DclFld ws           Type(iXLWorkSheet)
     DclFld sw           Type(StopWatch) New()
+    DclFld CurrentRow   Type(*Integer4) 
+
+    DclArray ColWidth    Type(*Integer4) Rank(1)
 
     DclConst HEADING_ROW Value(3)
 
@@ -41,6 +44,7 @@ BegClass Export Access(*Public) Implements(iQueryFileAdapter)
 
         If (*This.dt = *Nothing)
             *This.dt = dt
+            ColWidth = *New *Integer4[dt.Columns.Count]
         EndIf
 
         ws = wb.Worksheets.Add(Args.Inputs.Options["worksheetName"].ToString())
@@ -57,11 +61,40 @@ BegClass Export Access(*Public) Implements(iQueryFileAdapter)
             ws.Cell(Row,Col+1).Value = Field 
             Col += 1
         EndFor 
+
+        CurrentRow = Row + 1 
     EndSr
 
     BegSr Row Implements(iQueryFileAdapter.Row) Access(*Public)
         DclSrParm dt Type(DataTable)
 
+        DclFld   Col   Type(*Integer4) 
+        DclFld   Row   Type(*Integer4) 
+
+        Col = 1
+
+        ForEach dr Type(DataRow) Collection(dt.Rows) 
+            ForEach Column Type(DataColumn) Collection(dt.Columns) 
+                If ( System.Array.IndexOf(Args.Inputs.Fields,Column.ColumnName.ToLower()) > -1) 
+                    If (dr[Column.ColumnName].ToString().Trim().Length() > ColWidth[Col-1]) 
+                        ColWidth[Col-1] = dr[Column.ColumnName].ToString().Trim().Length()
+                    EndIf
+                    If (Column.DataType.FullName = "System.String") 
+                        ws.Cell(CurrentRow, Col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left 
+                    EndIf 
+                    If (Column.DataType.FullName = "System.Decimal") 
+                        ws.Cell(CurrentRow, Col).Value = Convert.ToDecimal(dr[Column.ColumnName].ToString())
+                    Else 
+                        ws.Cell(CurrentRow, Col).Value = dr[Column.ColumnName].ToString()
+                    EndIf 
+                    Col += 1 
+                EndIf
+            EndFor        
+            Col = 1
+            CurrentRow += 1
+        EndFor 
+
+        dt.Clear()
     EndSr
 
     BegSr Footer Implements(iQueryFileAdapter.Footer) Access(*Public)
@@ -86,34 +119,7 @@ BegClass Export Access(*Public) Implements(iQueryFileAdapter)
         DclSrParm ws   Type(IXLWorkSheet) 
         DclSrParm dt   Type(DataTable) 
 
-        DclFld   Col   Type(*Integer4) 
-        DclFld   Row   Type(*Integer4) 
-        DclFld   x     Type(*Integer4) 
-
-        DclArray ColWidth    Type(*Integer4) Rank(1)
-        ColWidth = *New *Integer4[dt.Columns.Count]
-
-        Row = HEADING_ROW + 1
-        Col = 1
-
-        ForEach dr Type(DataRow) Collection(dt.Rows) 
-            ForEach Column Type(DataColumn) Collection(dt.Columns) 
-                If (dr[Column.ColumnName].ToString().Trim().Length() > ColWidth[Col-1]) 
-                    ColWidth[Col-1] = dr[Column.ColumnName].ToString().Trim().Length()
-                EndIf
-                If (Column.DataType.FullName = "System.String") 
-                    ws.Cell(Row, Col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left 
-                EndIf 
-                If (Column.DataType.FullName = "System.Decimal") 
-                    ws.Cell(Row, Col).Value = Convert.ToDecimal(dr[Column.ColumnName].ToString())
-                Else 
-                    ws.Cell(Row, Col).Value = dr[Column.ColumnName].ToString()
-                EndIf 
-                Col += 1 
-            EndFor        
-            Col = 1
-            Row += 1
-        EndFor 
+        DclFld x Type(*Integer4) 
 
         For Index(x = 0) To(dt.Columns.Count -1)
             If (ColWidth[x] > 0 ) 
@@ -122,8 +128,7 @@ BegClass Export Access(*Public) Implements(iQueryFileAdapter)
         EndFor 
 
         sw.Stop()
-        Row += 1
-        ws.Cell(Row, Col).Value = String.Format("Milliseconds: {0:#,###}",sw.ElapsedMilliseconds)
-
+        CurrentRow += 1
+        ws.Cell(CurrentRow, 1).Value = String.Format("Milliseconds: {0:#,###}",sw.ElapsedMilliseconds)
     EndSr
 EndClass
