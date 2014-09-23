@@ -37,7 +37,6 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDB = DGDB
         *This.Args = Args
-        //*This.Args.Initialize()
 
         If ( OutputAdapter = *Nothing)            
             *This.OutputAdapter = *New ToDataTableAdapter()
@@ -70,6 +69,7 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDS = *Nothing
         *This.DGFile.OpenNewAdgDataSet(*ByRef DGDS)
+        DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
 
         Key = DGDS.NewKeyTable(0)
         ForEach fk Type(QueryField) Collection(*This.Args.Inputs.QueryFields) 
@@ -118,6 +118,7 @@ BegClass QueryFile Access(*Public)
         EOF = *False    
         Counter = 0 
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
+        DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
 
         OutputAdapter.Header(DGDS.Tables[0])
         DoWhile NOT DataGateAPI.ReadNextRecord(DGFile,DGDS)
@@ -183,15 +184,10 @@ BegClass QueryFile Access(*Public)
     BegFunc Exec Type(*Object) Access(*Public)
         DclFld timer                Type(StopWatch) New()
 
-
         Try
-//            If (*This.DGDB.State <> ConnectionState.Open)
-//                *This.DGDB.Open() 
-//            EndIf
-
             timer.Start()
             *This.GetQueryRows(*This.Args.Inputs.Rows) 
-            DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+//            DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
             SetdBeginningAndEndKeys(DGDS.Tables[0])
             timer.Stop()
             *This.Args.Outputs.ResultRowCount  = DGDS.Tables[0].Rows.Count 

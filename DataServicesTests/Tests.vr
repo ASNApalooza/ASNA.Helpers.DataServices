@@ -160,8 +160,8 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld DGDB     Type(AdgConnection) 
         DclFld Query    Type(ASNA.Helpers.DataServices.QueryDriver) 
 
-//        DGDB = *New AdgConnection(*This.DBNAME)
-        DGDB = *New AdgConnection("*Public/Cypress")
+        DGDB = *New AdgConnection(*This.DBNAME)
+//        DGDB = *New AdgConnection("*Public/Cypress")
 
         Query = *New ASNA.Helpers.DataServices.QueryDriver(DGDB) 
         ConfigureDataList(Query)
