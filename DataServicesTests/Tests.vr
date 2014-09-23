@@ -182,7 +182,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         args.Inputs.FieldsList = "State:text,Abbrev:value"
         args.Inputs.Rows       = 1000
         args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
-        args.Inputs.Query      = "STATE = 'IN'"
+        args.Inputs.Query      = "STATE >= 'A'"
         args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("STATE",""))
 
         ToListItemArrayAdapter = *New ASNA.Helpers.DataServices.ToLisItemArrayAdapter(Args)        
