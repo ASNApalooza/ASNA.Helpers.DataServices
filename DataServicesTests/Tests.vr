@@ -114,12 +114,12 @@ BegClass Tests Access(*Public) Attributes(TestClass())
                  
         Query.Args.Inputs.Library    = "examples"
         Query.Args.Inputs.File       = "CMastNewL2"
-        Query.Args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:Address,CMCITY:City,CMSTATE:State,CMPOSTCODE:Zip code"
+        Query.Args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:Address,CMCITY:City"
         Query.Args.Inputs.Rows       = 1000
         Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Paged
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
         Query.Args.Inputs.Options.Add("heading","Customer Listing")
-        Query.Args.Inputs.Options.Add("worksheetName","Customers")
+        Query.Args.Inputs.Options.Add("worksheet_name","Customers")
 
         ExcelAdapter = *New ASNA.Helpers.DataServices.ToExcelAdapter(Query.Args) 
         Query.OverrideAdapter(ExcelAdapter)
@@ -155,6 +155,35 @@ BegClass Tests Access(*Public) Attributes(TestClass())
             Assert.Fail(Query.Args.Error.ErrorMessage)
         EndIf 
     EndSr
+
+    BegSr GetLabList Attributes(TestMethod()) Access(*Public)
+        DclFld Query        Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
+        DclFld ExcelAdapter Type(ASNA.Helpers.DataServices.ToExcelAdapter)
+
+        DclConst EXCEL_FILE Value("C:\Users\Roger\Documents\testing\lablist.xlsx")
+                 
+        Query.Args.Inputs.Library    = "rppallab"
+        Query.Args.Inputs.File       = "attendee"
+        Query.Args.Inputs.FieldsList = "ID,LName:Last name,FNAME:First name,Lab1,Lab2,Lab3,Lab4"
+        Query.Args.Inputs.Rows       = 1000
+        Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Paged
+        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("ID",0))
+        Query.Args.Inputs.Options.Add("heading","Palooza Lab Listing 23-September-2014")
+        Query.Args.Inputs.Options.Add("worksheet_name","Attendees")
+//        Query.Args.Inputs.Options.Add("sumRows: 'Lab1','Lab2','Lab3,'Lab4'") 
+//        Query.Args.Inputs.Options.Add("sumColumns: 'Lab1','Lab2','Lab3,'Lab4'") 
+
+
+        ExcelAdapter = *New ASNA.Helpers.DataServices.ToExcelAdapter(Query.Args) 
+        Query.OverrideAdapter(ExcelAdapter)
+
+        File.Delete(EXCEL_FILE)
+        Query.Exec() 
+        ExcelAdapter.SaveToLocalFile(EXCEL_FILE)
+
+        Assert.IsTrue(File.Exists(EXCEL_FILE)) 
+
+    EndSr 
 
     BegSr LoadGrid  Attributes(TestMethod()) Access(*Public)
         DclFld DGDB     Type(AdgConnection) 

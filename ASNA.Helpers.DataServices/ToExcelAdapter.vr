@@ -23,7 +23,9 @@ BegClass ToExcelAdapter Access(*Public) Implements(iQueryFileAdapter)
     DclFld wb           Type(XLWorkBook) New()
     DclFld ws           Type(iXLWorkSheet)
     DclFld sw           Type(StopWatch) New()
+    DclFld dr           Type(DataRow)
     DclFld CurrentRow   Type(*Integer4) 
+    DclFld i            Type(*Integer4) 
 
     DclArray ColWidth    Type(*Integer4) Rank(1)
 
@@ -39,21 +41,46 @@ BegClass ToExcelAdapter Access(*Public) Implements(iQueryFileAdapter)
     BegSr Header Implements(iQueryFileAdapter.Header) Access(*Public)
         DclSrParm dt Type(DataTable)
 
-        DclFld Col  Type(*Integer4) 
-        DclFld Row  Type(*Integer4)
+        DclFld Col           Type(*Integer4) 
+        DclFld Row           Type(*Integer4)
+        DclFld SheetName     Type(*String) Inz("Main") 
+        DclFld Heading       Type(*String) 
+        
+        Heading = "File: " + Args.Inputs.File 
 
         If (*This.dt = *Nothing)
             *This.dt = dt
             ColWidth = *New *Integer4[dt.Columns.Count]
         EndIf
 
-        ws = wb.Worksheets.Add(Args.Inputs.Options["worksheetName"].ToString())
-        ws.Cell(1,1).Value = Args.Inputs.Options["heading"].ToString()
+        If (Args.Inputs.Options.ContainsKey("worksheet_name"))
+            SheetName = Args.Inputs.Options["worksheet_name"].ToString()
+        EndIf
+
+        If (Args.Inputs.Options.ContainsKey("heading"))
+            Heading = Args.Inputs.Options["heading"].ToString()
+        EndIf
+
+        ws = wb.Worksheets.Add(SheetName)
+        ws.Cell(1,1).Value = Heading
         ws.Cell(1,1).Style.Font.Bold = *True 
         ws.Cell(1,1).Style.Font.SetFontSize(14) 
 
         Row = HEADING_ROW
 
+        // Set column heading alignment.
+        Col = 0 
+        ForEach Column Type(DataColumn) Collection(dt.Columns) 
+            If (Column.DataType.FullName = "System.String") 
+                ws.Cell(Row, Col+1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left 
+            Else
+                ws.Cell(Row, Col+1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right
+            EndIf 
+            Col += 1 
+        EndFor        
+
+        // Write column headings.
+        Col = 0 
         ForEach Field Type(*String) Collection(args.Inputs.FieldAliases) 
             ws.Cell(Row,Col+1).Style.Font.Bold = *True 
             ws.Cell(Row,Col+1).Style.Border.TopBorder = XLBorderStyleValues.Medium
@@ -69,26 +96,26 @@ BegClass ToExcelAdapter Access(*Public) Implements(iQueryFileAdapter)
         DclSrParm dt Type(DataTable)
 
         DclFld   Col   Type(*Integer4) 
-        DclFld   Row   Type(*Integer4) 
+        DclFld   Row   Type(*Integer4)  
 
+        // Write rows.
         Col = 1
-
         ForEach dr Type(DataRow) Collection(dt.Rows) 
             ForEach Column Type(DataColumn) Collection(dt.Columns) 
-                If ( System.Array.IndexOf(Args.Inputs.Fields,Column.ColumnName.ToLower()) > -1) 
-                    If (dr[Column.ColumnName].ToString().Trim().Length() > ColWidth[Col-1]) 
-                        ColWidth[Col-1] = dr[Column.ColumnName].ToString().Trim().Length()
-                    EndIf
-                    If (Column.DataType.FullName = "System.String") 
-                        ws.Cell(CurrentRow, Col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left 
-                    EndIf 
-                    If (Column.DataType.FullName = "System.Decimal") 
-                        ws.Cell(CurrentRow, Col).Value = Convert.ToDecimal(dr[Column.ColumnName].ToString())
-                    Else 
-                        ws.Cell(CurrentRow, Col).Value = dr[Column.ColumnName].ToString()
-                    EndIf 
-                    Col += 1 
+                If (dr[Column.ColumnName].ToString().Trim().Length() > ColWidth[Col-1]) 
+                    ColWidth[Col-1] = dr[Column.ColumnName].ToString().Trim().Length()
                 EndIf
+                If (Column.DataType.FullName = "System.String") 
+                    ws.Cell(CurrentRow, Col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left 
+                Else
+                    ws.Cell(CurrentRow, Col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right
+                EndIf 
+                If (Column.DataType.FullName = "System.Decimal") 
+                    ws.Cell(CurrentRow, Col).Value = Convert.ToDecimal(dr[Column.ColumnName].ToString())
+                Else 
+                    ws.Cell(CurrentRow, Col).Value = dr[Column.ColumnName].ToString()
+                EndIf 
+                Col += 1 
             EndFor        
             Col = 1
             CurrentRow += 1
@@ -99,12 +126,10 @@ BegClass ToExcelAdapter Access(*Public) Implements(iQueryFileAdapter)
 
     BegSr Footer Implements(iQueryFileAdapter.Footer) Access(*Public)
         DclSrParm dt Type(DataTable)
-
     EndSr
 
     BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
         DclSrParm dt Type(DataTable)
-
 
         WriteDataTableRows(ws,dt)            
     EndSr
