@@ -1,0 +1,10 @@
+﻿Using System
+Using System.Text
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass QueryFieldInfo Access(*Public) 
+    DclFld Name  Type(*String) Access(*Public)
+    DclFld Type  Type(*String) Access(*Public)
+    DclFld Value Type(*Object) Access(*Public)
+EndClass

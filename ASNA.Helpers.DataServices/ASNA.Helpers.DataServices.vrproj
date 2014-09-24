@@ -57,7 +57,15 @@
       <SubType>
       </SubType>
     </Compile>
+    <Compile Include="Parse.vr">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="QueryDriver.vr">
+      <SubType>
+      </SubType>
+    </Compile>
+    <Compile Include="QueryFieldInfo.vr">
       <SubType>
       </SubType>
     </Compile>

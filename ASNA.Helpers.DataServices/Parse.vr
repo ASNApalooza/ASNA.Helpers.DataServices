@@ -1,0 +1,84 @@
+﻿Using System
+Using System.Text
+Using System.Collections
+Using System.Collections.Generic 
+Using System.Text.RegularExpressions
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass Parse Access(*Public)
+
+    BegFunc ParseQueryField Type(QueryFieldInfo) Access(*Public) Shared(*Yes)
+        DclSrParm Input Type(*String) 
+
+        DclFld vp    Type(Dictionary(*Of *String,*Object)) New()
+
+        DclArray tokens      Type(*String) Rank(1)
+        DclFld   Result      Type(QueryFieldInfo) New()
+
+        Input = Input.Trim()
+        If (Input.StartsWith("@") AND Input.Contains(":")) 
+            Input = RemoveLeadingChar(Input,"@")
+            tokens = SplitOnDelimiter(Input,":")      
+            Result.Name = tokens[0]
+            ParseForLiteral(Result,Tokens[1]) 
+        EndIf 
+
+        LeaveSr Result 
+    EndFunc 
+
+    BegSr ParseForLiteral Access(*Public) Shared(*Yes)
+        DclSrParm fi    Type(QueryFieldInfo)
+        DclSrParm Value Type(*String) 
+
+        DclFld LiteralInfo Type(Dictionary(*Of *String,*String)) New()
+        DclFld Prefix      Type(*String) 
+        DclFld Mask        Type(*String) 
+
+        If (Regex.IsMatch(Value,"^[bdil]'.*'$"))
+            Value = Value.Trim() 
+            If (Value.SubString(1,1) = "'") 
+                Prefix = Value.Substring(0,1) 
+                Mask   = Value.SubString(2).Replace("'",String.Empty)
+                fi.Type = prefix
+                fi.Value = Mask 
+            EndIf
+        Else 
+            Throw *New System.ArgumentException("Literal must be specified in the format n'm'")
+        EndIf 
+    EndSr
+
+    BegFunc RemoveLeadingChar Type(*String) Access(*Public) Shared(*Yes)
+        DclSrParm Value       Type(*String) 
+        DclSrParm LeadingChar Type(*String) 
+
+        If (Value.StartsWith(LeadingChar)) 
+            LeaveSr Value.Substring(1) 
+        Else 
+            LeaveSr Value 
+        EndIf        
+    EndFunc 
+
+    BegFunc SplitOnDelimiter Type(*String) Rank(1) Access(*Public) Shared(*Yes)
+        DclSrParm Value Type(*String) 
+        DclSrParm Delimiter Type(*String) 
+
+        DclArray tokens Type(*String) Rank(1) 
+
+        Value = Value.Trim()
+
+        If (Value.Contains(Delimiter)) 
+            tokens = Regex.Split(Value.Trim(), String.Format("\s*{0}\s*",Delimiter))             
+        Else
+            tokens = *New *String[2]
+            tokens[0] = Value
+            tokens[1] = Value
+        EndIf
+
+        LeaveSr tokens
+    EndFunc
+
+
+
+EndClass
+

@@ -10,6 +10,7 @@ Using NewtonSoft.Json
 Using System.Diagnostics
 Using ClosedXMl.Excel
 Using System.Web.UI.WebControls 
+Using System.Text.RegularExpressions
 
 // Set reference to Microsoft.VisualStudio.QualityTools.UnitTestFramework
 
@@ -48,7 +49,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
     BegSr CloseDB Access(*Public) Attributes(ClassCleanup()) Shared(*Yes)
       Tests.db.Close()
     EndSr
-
+        
     BegSr PagedQueryToDataTable Attributes(TestMethod()) Access(*Public)       
         DclFld Query         Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
         DclFld dt            Type(DataTable)

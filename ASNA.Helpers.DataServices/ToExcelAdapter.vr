@@ -23,9 +23,7 @@ BegClass ToExcelAdapter Access(*Public) Implements(iQueryFileAdapter)
     DclFld wb           Type(XLWorkBook) New()
     DclFld ws           Type(iXLWorkSheet)
     DclFld sw           Type(StopWatch) New()
-    DclFld dr           Type(DataRow)
     DclFld CurrentRow   Type(*Integer4) 
-    DclFld i            Type(*Integer4) 
 
     DclArray ColWidth    Type(*Integer4) Rank(1)
 
