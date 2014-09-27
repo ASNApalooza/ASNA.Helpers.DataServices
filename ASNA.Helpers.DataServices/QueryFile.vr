@@ -118,15 +118,15 @@ BegClass QueryFile Access(*Public)
         EOF = *False    
         Counter = 0 
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
-        DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+        //DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
 
         OutputAdapter.Header(DGDS.Tables[0])
         DoWhile NOT DataGateAPI.ReadNextRecord(DGFile,DGDS)
+            OutputAdapter.Row(DGDS.Tables[0])
             Counter += 1 
             If (Counter = RecordsToRead)
                 Leave
             EndIf
-            OutputAdapter.Row(DGDS.Tables[0])
         EndDo 
         OutputAdapter.Footer(DGDS.Tables[0])
     EndSr

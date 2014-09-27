@@ -21,8 +21,8 @@ Using System.Text.RegularExpressions
 
 BegClass Tests Access(*Public) Attributes(TestClass())
 
-    //DclConst DBName Value("*Public/CYPRESS") 
-    DclConst DBName Value("*Public/DG NET Local") 
+    DclConst DBName Value("*Public/CYPRESS") 
+    //DclConst DBName Value("*Public/DG NET Local") 
 
     DclFld db       Type(AdgConnection) Shared(*Yes)
 
@@ -50,6 +50,27 @@ BegClass Tests Access(*Public) Attributes(TestClass())
       Tests.db.Close()
     EndSr
         
+    BegSr TestSingleRowFetch  Attributes(TestMethod()) Access(*Public)       
+        DclFld Query        Type(ASNA.Helpers.DataServices.QueryDriver) 
+        DclFld dt           Type(DataTable)
+
+        DclFld id           Type(*Integer4) 
+
+        id = 1000
+
+        Query = *New ASNA.Helpers.DataServices.QueryDriver(db)        
+        Query.Args.Inputs.Library    = "rpwork"
+        Query.Args.Inputs.File       = "CustL1"
+        Query.Args.Inputs.FieldsList = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMCNTRY,CMPOSTCODE,CMACTIVE,CMFAX,CMPHONE,CMEMAIL"
+        Query.Args.Inputs.Rows       = 1
+        Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
+        Query.Args.Inputs.Query      = "CMCUSTNO = {CMCUSTNO}"
+        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",Id))
+
+        dt = Query.Exec() *As DataTable 
+        db.Close()
+    EndSr
+
     BegSr PagedQueryToDataTable Attributes(TestMethod()) Access(*Public)       
         DclFld Query         Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
         DclFld dt            Type(DataTable)
@@ -110,6 +131,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclFld Query        Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
         DclFld ExcelAdapter Type(ASNA.Helpers.DataServices.ToExcelAdapter)
         DclFld ArgsJson     Type(*String) 
+        DclFld Result       Type(*Object)
 
         DclConst EXCEL_FILE Value("C:\Users\Roger\Documents\testing\table-cleared.xlsx")
                  
@@ -126,7 +148,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.OverrideAdapter(ExcelAdapter)
 
         File.Delete(EXCEL_FILE)
-        Query.Exec() 
+        Result = Query.Exec() 
         ExcelAdapter.SaveToLocalFile(EXCEL_FILE)
 
         ArgsJson = JsonConvert.SerializeObject(Query.Args,Formatting.Indented)
