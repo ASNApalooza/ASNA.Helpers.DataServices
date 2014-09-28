@@ -61,6 +61,23 @@ BegClass QueryFile Access(*Public)
         LeaveSr DGDS.Tables[0]
     EndFunc 
 
+    BegSr CheckForFetchingAllColumns
+        DclSrParm dt Type(DataTable) 
+
+        DclFld sb         Type(StringBuilder) New(1024)
+        DclFld FieldList  Type(*String) 
+
+        If (args.Inputs.FieldsList.ToUpper().Trim() = "*ALL")
+            ForEach column Type(DataColumn) Collection(dt.Columns)
+                sb.Append(column.ColumnName + ",")
+            EndFor 
+
+            FieldList = sb.ToString()
+            FieldList = FieldList.SubString(0,FieldList.Length - 1) 
+            *This.Args.Inputs.FieldsList = FieldList 
+        EndIf 
+    EndSr
+
     BegSr ReadRowsWithPagedQuery
         DclSrParm RecordsToRead Type(*Integer4) 
 
@@ -69,6 +86,7 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDS = *Nothing
         *This.DGFile.OpenNewAdgDataSet(*ByRef DGDS)
+        CheckForFetchingAllColumns(DGDS.Tables[0])
         DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
 
         Key = DGDS.NewKeyTable(0)
@@ -118,7 +136,8 @@ BegClass QueryFile Access(*Public)
         EOF = *False    
         Counter = 0 
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
-        //DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+        CheckForFetchingAllColumns(DGDS.Tables[0])
+        DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
 
         OutputAdapter.Header(DGDS.Tables[0])
         DoWhile NOT DataGateAPI.ReadNextRecord(DGFile,DGDS)
