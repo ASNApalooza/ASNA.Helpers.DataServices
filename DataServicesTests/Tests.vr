@@ -21,8 +21,8 @@ Using System.Text.RegularExpressions
 
 BegClass Tests Access(*Public) Attributes(TestClass())
 
-    //DclConst DBName Value("*Public/CYPRESS") 
-    DclConst DBName Value("*Public/DG NET Local") 
+    DclConst DBName Value("*Public/CYPRESS") 
+    //DclConst DBName Value("*Public/DG NET Local") 
 
     DclFld db       Type(AdgConnection) Shared(*Yes)
 
@@ -34,7 +34,6 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         DclEnumFld Name
         DclENumFld Number
     EndEnum
-
 
     BegSr OpenDB Access(*Public) Attributes(ClassInitialize()) Shared(*Yes)
         DclSrParm context Type(Microsoft.VisualStudio.TestTools.UnitTesting.TestContext)
@@ -63,7 +62,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File       = "CustL1"
         Query.Args.Inputs.FieldsList = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMCNTRY,CMPOSTCODE,CMACTIVE,CMFAX,CMPHONE,CMEMAIL"
         Query.Args.Inputs.Rows       = 1
-        Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
+        //Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
         Query.Args.Inputs.Query      = "CMCUSTNO = {CMCUSTNO}"
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",Id))
 
@@ -80,7 +79,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.FieldsList   = "*ALL"
         //Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
-        Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         dt = Query.Exec() *As DataTable
@@ -96,7 +95,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File         = "CmastNewL1"
         Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
-        Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
@@ -105,6 +104,26 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         ArgsJson = JsonConvert.SerializeObject(Query.Args,Formatting.Indented)
         File.WriteAllText("c:\users\roger\documents\testing\PagedQueryToDataTable2-Args.json",ArgsJson)
         Assert.AreEqual(dt.Rows.Count, Query.Args.Inputs.Rows) 
+    EndSr 
+
+    BegSr PagedQueryToDataTable4 Attributes(TestMethod()) Access(*Public)
+        DclFld Query         Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
+        DclFld dt            Type(DataTable)
+        DclFld ArgsJson      Type(*String) 
+
+        Query.Args.Inputs.Library    = "examples"
+        Query.Args.Inputs.File       = "CMastNewL2"
+        Query.Args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:+
+                                        Address,CMCITY:City,CMSTATE:State"
+        Query.Args.Inputs.Rows       = 1000
+        Query.Args.Inputs.Query      = "CMSTATE = '{CMSTATE}'"
+        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMSTATE","IN"))
+
+        Query.Args.Inputs.Options.Add("heading","Customer Listing")
+        Query.Args.Inputs.Options.Add("worksheet_name","Customers")
+
+        dt = Query.Exec() *As DataTable
+        Assert.AreEqual(dt.Rows.Count, Convert.ToInt32(26)) 
     EndSr 
 
     BegSr PagedQueryToDataTable3 Attributes(TestMethod()) Access(*Public)
@@ -116,7 +135,6 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File         = "CmastNewL2"
         Query.Args.Inputs.FieldsList   = "*ALL" //CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
-        Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","Smi"))
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
@@ -137,7 +155,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File         = "CmastNewL1"
         Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTODE"
         Query.Args.Inputs.Rows         = 12
-        Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Query.Args.Inputs.Options.Add("indentJson", *True) 
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
         Query.OverrideAdapter(*New ASNA.Helpers.DataServices.ToJsonAdapter(Query.Args)) 
@@ -160,10 +178,12 @@ BegClass Tests Access(*Public) Attributes(TestClass())
                  
         Query.Args.Inputs.Library    = "examples"
         Query.Args.Inputs.File       = "CMastNewL2"
-        Query.Args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:Address,CMCITY:City"
+        Query.Args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:+
+                                        Address,CMCITY:City,CMSTATE:State"
         Query.Args.Inputs.Rows       = 1000
-        Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Paged
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Query.Args.Inputs.Query      = "CMSTATE = '{CMSTATE}'"
+        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMSTATE","IN"))
+
         Query.Args.Inputs.Options.Add("heading","Customer Listing")
         Query.Args.Inputs.Options.Add("worksheet_name","Customers")
 
@@ -172,8 +192,12 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         File.Delete(EXCEL_FILE)
         Result = Query.Exec() 
-        ExcelAdapter.SaveToLocalFile(EXCEL_FILE)
+        If (Query.Args.Error.ErrorException <> *Nothing)
+            ArgsJson = Query.Args.Error.ErrorException.Message 
+        EndIf             
+        Assert.AreEqual(Query.Args.Outputs.ResultRowCount, Convert.ToInt32(26))
 
+        ExcelAdapter.SaveToLocalFile(EXCEL_FILE)
         ArgsJson = JsonConvert.SerializeObject(Query.Args,Formatting.Indented)
         File.WriteAllText("c:\users\roger\documents\testing\Excel-args.json",ArgsJson)
 
@@ -188,7 +212,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File       = "States"
         Query.Args.Inputs.FieldsList = "State:text,Abbrev:value"
         Query.Args.Inputs.Rows       = 1000
-        Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
+        //Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
         Query.Args.Inputs.Query      = "STATE >= 'A'"
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("STATE",""))
         Query.OverrideAdapter(*New ASNA.Helpers.DataServices.ToLisItemArrayAdapter(Query.Args))
@@ -262,7 +286,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File         = "CmastNewL2"
         Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME"
         Query.Args.Inputs.Rows         = 12
-        Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
+        //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
 
         If (CurrentOrderBy = OrderBy.Name) 
             Query.Args.Inputs.File      = "CmastNewL2"

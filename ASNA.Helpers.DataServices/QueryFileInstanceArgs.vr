@@ -35,7 +35,7 @@ BegClass QueryFileInstanceArgs Access(*Public)
             EndProp
         DclFld Rows         Type(*Integer4) Access(*Public) 
         DclFld Query        Type(*String) Access(*Public) 
-        DclFld QueryType    Type(ASNA.Helpers.DataServices.QueryType) Inz(ASNA.Helpers.DataServices.QueryType.Simple) Access(*Public)
+        DclFld QueryType    Type(ASNA.Helpers.DataServices.QueryType) Inz(ASNA.Helpers.DataServices.QueryType.Simple) Access(*Public) Attributes(Obsolete("Presence of Query property determines QueryType"))
         DclFld QueryFields  Type(List(*Of QueryField)) Access(*Public) New()
         DclArray Fields         Type(*String) Rank(1) Access(*Public)
         DclArray FieldAliases   Type(*String) Rank(1) Access(*Public)

@@ -47,6 +47,8 @@ BegClass QueryFile Access(*Public)
       
     BegFunc GetQueryRows Access(*Public) Type(DataTable) 
         DclSrParm RecordsToRead Type(*Integer4) 
+
+        *This.Args.Outputs.ResultRowCount = 0 
        
         *This.DGFile = DataGateAPI.OpenDGFileForRead(*This.DGDB,*This.Args.Inputs.Library,*This.Args.Inputs.File)
 
@@ -88,6 +90,7 @@ BegClass QueryFile Access(*Public)
         *This.DGFile.OpenNewAdgDataSet(*ByRef DGDS)
         CheckForFetchingAllColumns(DGDS.Tables[0])
         DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+        *This.Args.Outputs.ResultColCount = *This.Args.Inputs.Fields.Length
 
         Key = DGDS.NewKeyTable(0)
         ForEach fk Type(QueryField) Collection(*This.Args.Inputs.QueryFields) 
@@ -97,12 +100,7 @@ BegClass QueryFile Access(*Public)
         DGFile.SeekKey(SeekMode.Last, Key) 
         EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
 
-        Try 
-            DGFile.SeekKey(SeekMode.SetGT, Key) 
-        Catch ex Type(DGException) 
-            DclFLd x Type(*String) 
-            x = ex.Message
-        EndTry 
+        DGFile.SeekKey(SeekMode.SetGT, Key) 
 
         OutputAdapter.Header(DGDS.Tables[0])
         Do FromVal(1) ToVal(RecordsToRead) 
@@ -111,6 +109,7 @@ BegClass QueryFile Access(*Public)
                 Leave
             EndIf
             OutputAdapter.Row(DGDS.Tables[0])
+            *This.Args.Outputs.ResultRowCount += 1
         EndDo 
         OutputAdapter.Footer(DGDS.Tables[0])
     EndSr
@@ -138,10 +137,12 @@ BegClass QueryFile Access(*Public)
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
         CheckForFetchingAllColumns(DGDS.Tables[0])
         DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
+        *This.Args.Outputs.ResultColCount = *This.Args.Inputs.Fields.Length
 
         OutputAdapter.Header(DGDS.Tables[0])
         DoWhile NOT DataGateAPI.ReadNextRecord(DGFile,DGDS)
             OutputAdapter.Row(DGDS.Tables[0])
+            *This.Args.Outputs.ResultRowCount += 1
             Counter += 1 
             If (Counter = RecordsToRead)
                 Leave
@@ -205,12 +206,16 @@ BegClass QueryFile Access(*Public)
 
         Try
             timer.Start()
+            If (String.IsNullOrEmpty(*This.Args.Inputs.Query)) 
+                *This.Args.Inputs.QueryType = ASNA.Helpers.DataServices.QueryType.Paged
+            Else 
+                *This.Args.Inputs.QueryType = ASNA.Helpers.DataServices.QueryType.Simple 
+            EndIf
             *This.GetQueryRows(*This.Args.Inputs.Rows) 
-//            DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
             SetdBeginningAndEndKeys(DGDS.Tables[0])
             timer.Stop()
-            *This.Args.Outputs.ResultRowCount  = DGDS.Tables[0].Rows.Count 
-            *This.Args.Outputs.ResultColCount  = DGDS.Tables[0].Columns.Count
+            //*This.Args.Outputs.ResultRowCount  = DGDS.Tables[0].Rows.Count 
+            //*This.Args.Outputs.ResultColCount  = DGDS.Tables[0].Columns.Count
             *This.Args.Outputs.Milliseconds    = timer.ElapsedMilliseconds
             OutputAdapter.Render(DGDS.Tables[0])
 
