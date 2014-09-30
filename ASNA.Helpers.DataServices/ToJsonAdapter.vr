@@ -63,49 +63,57 @@ BegClass ToJsonAdapter Implements(iQueryFileAdapter)  Access(*Public)
 //        Else
 //            writer.Formatting = Formatting.None
 //        EndIf
-        writer.WriteStartObject()
-        writer.WritePropertyName("resultRowCount")
-        writer.WriteValue(Args.Outputs.ResultRowCount)
-        writer.WritePropertyName("milliseconds")
-        writer.WriteValue(Args.Outputs.Milliseconds.ToString("#,##0")) 
-       
-        writer.WritePropertyName("list")
-        writer.WriteStartArray()      
-        ForEach dr Type(DataRow) Collection(dt.Rows)
-            writer.WriteStartObject()
-            ForEach FieldName Type(*String) Collection(Args.Inputs.Fields) 
-                writer.WritePropertyName(Args.Inputs.GetCorrespondingFieldAlias(FieldName))
-                writer.WriteValue(dr[FieldName].ToString().Trim()) 
-            EndFor
-            writer.WriteEndObject()
-        EndFor 
-        writer.WriteEndArray()
-
-        writer.WritePropertyName("startingKey")
-        writer.WriteStartArray()      
-
-        ForEach key Type(QueryField) Collection(Args.Outputs.StartingKeys) 
-            writer.WriteStartObject()
-            writer.WritePropertyName(key.FieldName)
-            writer.WriteValue(key.FieldValue) 
-            writer.WriteEndObject() 
-        EndFor
-        writer.WriteEndArray()
-                
-        writer.WritePropertyName("endingKey")
-        writer.WriteStartArray()      
-        dr = dt.Rows[dt.Rows.Count-1] 
-        ForEach key Type(QueryField) Collection(Args.Outputs.EndingKeys)
-            writer.WriteStartObject()
-            writer.WritePropertyName(key.FieldName)
-            writer.WriteValue(key.FieldValue) 
-            writer.WriteEndObject() 
-        EndFor
+         writer.WriteStartObject()
+         writer.WritePropertyName("resultRowCount")
+         writer.WriteValue(Args.Outputs.ResultRowCount)
+         writer.WritePropertyName("milliseconds")
+         writer.WriteValue(Args.Outputs.Milliseconds.ToString("#,##0")) 
         
-        writer.WriteEndArray()
+        If (dt.Rows.Count = 0) 
+            writer.WritePropertyName("list")
+            writer.WriteStartArray()      
+            writer.WriteEndArray()
+            writer.WritePropertyName("error")
+            writer.WriteValue("No data found to match query")            
+        Else
+            writer.WritePropertyName("list")
+            writer.WriteStartArray()      
+            ForEach dr Type(DataRow) Collection(dt.Rows)
+                writer.WriteStartObject()
+                ForEach FieldName Type(*String) Collection(Args.Inputs.Fields) 
+                    writer.WritePropertyName(Args.Inputs.GetCorrespondingFieldAlias(FieldName))
+                    writer.WriteValue(dr[FieldName].ToString().Trim()) 
+                EndFor
+                writer.WriteEndObject()
+            EndFor 
+            writer.WriteEndArray()
 
+            writer.WritePropertyName("startingKey")
+            writer.WriteStartArray()      
+
+            ForEach key Type(QueryField) Collection(Args.Outputs.StartingKeys) 
+                writer.WriteStartObject()
+                writer.WritePropertyName(key.FieldName)
+                writer.WriteValue(key.FieldValue) 
+                writer.WriteEndObject() 
+            EndFor
+            writer.WriteEndArray()
+                
+            writer.WritePropertyName("endingKey")
+            writer.WriteStartArray()      
+            dr = dt.Rows[dt.Rows.Count-1] 
+            ForEach key Type(QueryField) Collection(Args.Outputs.EndingKeys)
+                writer.WriteStartObject()
+                writer.WritePropertyName(key.FieldName)
+                writer.WriteValue(key.FieldValue) 
+                writer.WriteEndObject() 
+            EndFor
+        
+            writer.WriteEndArray()
+        EndIf 
+        
         writer.Close()
-
+        
         LeaveSr sb.ToString() 
     EndFunc
 

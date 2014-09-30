@@ -78,15 +78,16 @@ BegClass DataGateAPI Access(*Public)
 
         DclFld Result Type(*String)
 
-        Result = Query.ToUpper()
+        //Result = Query.ToUpper()
+        Result = Query
 
         If (PlatformIdentifier.Trim().ToUpper() = "DB2" OR PlatformIdentifier.Trim().ToUpper() = "IBM I")  
             // Non-IBM i platforms don't want the asterisk with the AND/OR operations.
             // This code assumes the database name label property isn't "DB2" for non-IBM i databases.
-//            Result = Regex.Replace(Query,"\s/*AND\s*", " *AND " )
-//            Result = Regex.Replace(Result,"\s/*OR\s*", " *OR " )
-            Result = Query.Replace(" AND "," *AND ") 
-            Result = Result.Replace(" OR "," *OR ") 
+            Result = Regex.Replace(Query,"\s/*AND\s*", " *AND ",RegexOptions.IgnoreCase)
+            Result = Regex.Replace(Result,"\s/*OR\s*", " *OR ",RegexOptions.IgnoreCase)
+//            Result = Query.Replace(" AND "," *AND ") 
+ //           Result = Result.Replace(" OR "," *OR ") 
         EndIf 
 
         LeaveSr Result

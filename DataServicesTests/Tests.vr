@@ -21,8 +21,8 @@ Using System.Text.RegularExpressions
 
 BegClass Tests Access(*Public) Attributes(TestClass())
 
-    DclConst DBName Value("*Public/CYPRESS") 
-    //DclConst DBName Value("*Public/DG NET Local") 
+    //DclConst DBName Value("*Public/CYPRESS") 
+    DclConst DBName Value("*Public/DG NET Local") 
 
     DclFld db       Type(AdgConnection) Shared(*Yes)
 
@@ -49,6 +49,27 @@ BegClass Tests Access(*Public) Attributes(TestClass())
       Tests.db.Close()
     EndSr
         
+//    BegSr FindContactByEmail  Attributes(TestMethod()) Access(*Public)       
+//        DclFld Query        Type(ASNA.Helpers.DataServices.QueryDriver) 
+//        DclFld dt           Type(DataTable)
+//        
+//        Query = *New ASNA.Helpers.DataServices.QueryDriver(db)        
+//        Query.Args.Inputs.Library    = "rpDB"
+//        Query.Args.Inputs.File       = "customerL3"
+//        Query.Args.Inputs.FieldsList = "*All"
+//        Query.Args.Inputs.Rows       = 1
+//        Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
+//        Query.Args.Inputs.Query      = "CMCONEMAIL = '{CMCONEMAIL}'"
+//        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCONEMAIL","janet1@adventure-works.com"))
+//
+//        dt = Query.Exec() *As DataTable 
+//
+//        DclFld x Type(*Integer4) 
+//
+//        x = Convert.ToInt32(dt.Rows[0]["CMCUSTNO"])
+//    EndSr
+
+
     BegSr TestSingleRowFetch  Attributes(TestMethod()) Access(*Public)       
         DclFld Query        Type(ASNA.Helpers.DataServices.QueryDriver) 
         DclFld dt           Type(DataTable)
@@ -126,6 +147,26 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Assert.AreEqual(dt.Rows.Count, Convert.ToInt32(26)) 
     EndSr 
 
+    BegSr PagedQueryNoData Attributes(TestMethod()) Access(*Public)
+        DclFld Query         Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
+        DclFld dt            Type(DataTable)
+        DclFld ArgsJson      Type(*String) 
+
+        Query.Args.Inputs.Library    = "examples"
+        Query.Args.Inputs.File       = "CMastNewL2"
+        Query.Args.Inputs.FieldsList = "CMCUSTNO:Number,CMNAME:Name,CMADDR1:+
+                                        Address,CMCITY:City,CMSTATE:State"
+        Query.Args.Inputs.Rows       = 1000
+        Query.Args.Inputs.Query      = "CMNAME >= 'z'"
+        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME",""))
+
+        dt = Query.Exec() *As DataTable
+
+        ArgsJson = JsonConvert.SerializeObject(dt) 
+
+        Assert.AreEqual(dt.Rows.Count, Convert.ToInt32(0)) 
+    EndSr 
+
     BegSr PagedQueryToDataTable3 Attributes(TestMethod()) Access(*Public)
         DclFld Query         Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
         DclFld dt            Type(DataTable)
@@ -153,14 +194,14 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         Query.Args.Inputs.Library      = "examples"
         Query.Args.Inputs.File         = "CmastNewL1"
-        Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTODE"
-        Query.Args.Inputs.Rows         = 12
-        //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
-        Query.Args.Inputs.Options.Add("indentJson", *True) 
+        Query.Args.Inputs.FieldsList   = "*All" 
+        Query.Args.Inputs.Rows         = 2000
+        Query.Args.Inputs.Query        = "CMCUSTNO >= 0"
         Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
         Query.OverrideAdapter(*New ASNA.Helpers.DataServices.ToJsonAdapter(Query.Args)) 
         
         Json = Query.Exec() *As *String
+        Assert.IsNull(Query.Args.Error.ErrorException)
 
         ArgsJson = JsonConvert.SerializeObject(Query.Args,Formatting.Indented)
         File.WriteAllText("c:\users\roger\documents\testing\PagedQueryToJson-args.json",ArgsJson)
