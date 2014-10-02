@@ -85,7 +85,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.Rows       = 1
         //Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
         Query.Args.Inputs.Query      = "CMCUSTNO = {CMCUSTNO}"
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",Id))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",Id))
 
         dt = Query.Exec() *As DataTable 
         db.Close()
@@ -101,7 +101,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         //Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
         //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         dt = Query.Exec() *As DataTable
         Assert.AreEqual(dt.Rows.Count, Query.Args.Inputs.Rows) 
@@ -117,8 +117,8 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
         //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         dt = Query.Exec() *As DataTable
 
@@ -138,7 +138,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
                                         Address,CMCITY:City,CMSTATE:State"
         Query.Args.Inputs.Rows       = 1000
         Query.Args.Inputs.Query      = "CMSTATE = '{CMSTATE}'"
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMSTATE","IN"))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMSTATE","IN"))
 
         Query.Args.Inputs.Options.Add("heading","Customer Listing")
         Query.Args.Inputs.Options.Add("worksheet_name","Customers")
@@ -158,7 +158,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
                                         Address,CMCITY:City,CMSTATE:State"
         Query.Args.Inputs.Rows       = 1000
         Query.Args.Inputs.Query      = "CMNAME >= 'z'"
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME",""))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME",""))
 
         dt = Query.Exec() *As DataTable
 
@@ -176,8 +176,8 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.File         = "CmastNewL2"
         Query.Args.Inputs.FieldsList   = "*ALL" //CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","Smi"))
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME","Smi"))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         dt = Query.Exec() *As DataTable
 
@@ -197,7 +197,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.FieldsList   = "*All" 
         Query.Args.Inputs.Rows         = 2000
         Query.Args.Inputs.Query        = "CMCUSTNO >= 0"
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
         Query.OverrideAdapter(*New ASNA.Helpers.DataServices.ToJsonAdapter(Query.Args)) 
         
         Json = Query.Exec() *As *String
@@ -223,7 +223,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
                                         Address,CMCITY:City,CMSTATE:State"
         Query.Args.Inputs.Rows       = 1000
         Query.Args.Inputs.Query      = "CMSTATE = '{CMSTATE}'"
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMSTATE","IN"))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMSTATE","IN"))
 
         Query.Args.Inputs.Options.Add("heading","Customer Listing")
         Query.Args.Inputs.Options.Add("worksheet_name","Customers")
@@ -255,7 +255,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.Rows       = 1000
         //Query.Args.Inputs.QueryType  = ASNA.Helpers.DataServices.QueryType.Simple
         Query.Args.Inputs.Query      = "STATE >= 'A'"
-        Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("STATE",""))
+        Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("STATE",""))
         Query.OverrideAdapter(*New ASNA.Helpers.DataServices.ToLisItemArrayAdapter(Query.Args))
 
         ListItems = Query.Exec() *As ListItem[]
@@ -331,11 +331,11 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         If (CurrentOrderBy = OrderBy.Name) 
             Query.Args.Inputs.File      = "CmastNewL2"
-            Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME",*This.CMNameValue))
-            Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",*This.CMCustNoValue))
+            Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMNAME",*This.CMNameValue))
+            Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",*This.CMCustNoValue))
         ElseIf (CurrentOrderBy = OrderBy.Number)
             Query.Args.Inputs.File      = "CmastNewL1"        
-            Query.Args.Inputs.QueryFields.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",*This.CMCustNoValue))        
+            Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",*This.CMCustNoValue))        
         EndIf             
     EndSr 
 

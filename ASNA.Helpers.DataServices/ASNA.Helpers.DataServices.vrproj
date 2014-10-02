@@ -82,6 +82,10 @@
       </SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.vr" />
+    <Compile Include="QueryOrderByField.vr">
+      <SubType>
+      </SubType>
+    </Compile>
     <Compile Include="ToDataTableAdapter.vr">
       <SubType>
       </SubType>

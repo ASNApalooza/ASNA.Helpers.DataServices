@@ -21,6 +21,18 @@ BegClass QueryField
             _FieldValue = *PropVal
         EndSet
     EndProp
+
+//    DclFld _SortOrder Type( *Integer4 ) Inz(0) 
+//    BegProp SortOrder Type( *Integer4 )  Access( *Public )
+//        BegGet
+//            LeaveSr Value( _SortOrder )
+//        EndGet
+//    
+//        BegSet
+//            _SortOrder = *PropVal
+//        EndSet
+//    EndProp
+
     
     BegConstructor Access( *Public ) 
         DclSrParm FieldName  Type( *String ) 
@@ -29,4 +41,13 @@ BegClass QueryField
         *This.FieldName = FieldName
         *This.FieldValue = FieldValue  
     EndConstructor 
+
+//    BegConstructor Access( *Public ) 
+//        DclSrParm FieldName  Type( *String ) 
+//        DclSrParm SortOrder  Type( *Integer4 ) 
+//        
+//        *This.FieldName = FieldName
+//        *This.SortOrder = SortOrder 
+//    EndConstructor 
+
 EndClass

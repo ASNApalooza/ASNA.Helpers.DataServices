@@ -58,18 +58,32 @@ BegClass DataGateAPI Access(*Public)
     EndFunc     
 
     BegSr PopulateDGKeysAndUsage Access(*Public) Shared(*Yes)
-        DclSrParm Keys        Type(*String) Rank(1) By(*Reference)
-        DclSrParm Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1) By(*Reference) 
-        DclSrParm QueryFields Type(List(*Of QueryField))
+        DclSrParm Keys       Type(*String) Rank(1) By(*Reference)
+        DclSrParm Usage      Type(ASNA.DataGate.Common.KeyUsages) Rank(1) By(*Reference) 
+        DclSrParm QueryArgs  Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
 
-        DclFld i Type(*Integer4)
+        DclFld qf Type(List(*Of QueryField))
+        DclFld i  Type(*Integer4) 
 
-        Keys = *New String[QueryFields.Count] 
-        Usage = *New KeyUsages[QueryFields.Count] 
-        Do FromVal(0) ToVal(QueryFields.Count - 1) Index(i)
-            keys[i] = QueryFields[i].FieldName
-            Usage[i] = KeyUsages.ASCEND
-        EndDo     
+        // Generally DG Keys and Usage should be populated from the QueryArgs.Inputs.OrderBy collection.
+        // If an OrderBy isn't specified, the default order by is determined by the QueryArgs.Inputs.QueryParms 
+        // collection.
+
+        If (QueryArgs.Inputs.OrderBy.Count = 0)             
+            Keys = *New String[QueryArgs.Inputs.QueryParms.Count] 
+            Usage = *New KeyUsages[QueryArgs.Inputs.QueryParms.Count ] 
+            Do FromVal(0) ToVal(QueryArgs.Inputs.QueryParms.Count - 1) Index(i)
+                keys[i] = QueryArgs.Inputs.QueryParms[i].FieldName
+                Usage[i] = KeyUsages.ASCEND
+            EndDo     
+        Else
+            Keys = *New String[QueryArgs.Inputs.OrderBy.Count] 
+            Usage = *New KeyUsages[QueryArgs.Inputs.OrderBy.Count ] 
+            Do FromVal(0) ToVal(QueryArgs.Inputs.OrderBy.Count - 1) Index(i)
+                keys[i] = QueryArgs.Inputs.OrderBy[i].FieldName
+                Usage[i] = QueryArgs.Inputs.OrderBy[i].SortOrder
+            EndDo     
+        EndIf 
     EndSr
 
     BegFunc SetCorrectAndOrInQuery  Type(*String) Access(*Public) Shared(*Yes)

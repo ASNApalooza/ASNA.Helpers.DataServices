@@ -113,7 +113,7 @@ BegClass QueryFile Access(*Public)
         *This.Args.Outputs.ResultColCount = *This.Args.Inputs.Fields.Length
 
         Key = DGDS.NewKeyTable(0)
-        ForEach fk Type(QueryField) Collection(*This.Args.Inputs.QueryFields) 
+        ForEach fk Type(QueryField) Collection(*This.Args.Inputs.QueryParms) 
             Key.Row[fk.FieldName] = fk.FieldValue 
         EndFor 
 
@@ -147,7 +147,7 @@ BegClass QueryFile Access(*Public)
 
         QueryMask.Append(CheckQueryArgs(*This.Args.Inputs.Query)) 
         CreateQueryDefinition(QueryMask)                 
-        DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args.Inputs.QueryFields)
+        DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args)
         
         Query = QueryMask.ToString() 
         Query = DataGateAPI.SetCorrectAndOrInQuery(Query,DGDB.SourceProfile.Label)
@@ -198,9 +198,9 @@ BegClass QueryFile Access(*Public)
         DclFld i         Type(*Integer4)
         
         // Create query for OpenQueryFile.    
-        Do FromVal(0) ToVal(*This.Args.Inputs.QueryFields.Count - 1) Index(i)
-            KeyValue = String.Format("{0}", DataGateAPI.EscapeQueryFieldValue(*This.Args.Inputs.QueryFields[i].FieldValue.ToString())) 
-            KeyField = String.Format("{{{0}}}",*This.Args.Inputs.QueryFields[i].FieldName.ToUpper())
+        Do FromVal(0) ToVal(*This.Args.Inputs.QueryParms.Count - 1) Index(i)
+            KeyValue = String.Format("{0}", DataGateAPI.EscapeQueryFieldValue(*This.Args.Inputs.QueryParms[i].FieldValue.ToString())) 
+            KeyField = String.Format("{{{0}}}",*This.Args.Inputs.QueryParms[i].FieldName.ToUpper())
             QueryMask.Replace(KeyField,KeyValue) 
         EndDo
     EndSr
@@ -212,11 +212,11 @@ BegClass QueryFile Access(*Public)
 
         If (dt.Rows.Count > 0) 
             dr = dt.Rows[0]         
-            ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
+            ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryParms)
                 *This.Args.Outputs.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
             EndFor
             dr = dt.Rows[dt.Rows.Count-1] 
-            ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryFields)
+            ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryParms)
                 *This.Args.Outputs.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
             EndFor
         EndIf 

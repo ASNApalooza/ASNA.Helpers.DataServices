@@ -1,0 +1,38 @@
+﻿Using System
+Using System.Text
+
+DclNamespace ASNA.Helpers.DataServices
+
+BegClass QueryOrderByField Access(*Public)
+    DclFld _FieldName Type( *String )
+    BegProp FieldName Type( *String )  Access( *Public )
+        BegGet
+            LeaveSr Value( _FieldName )
+        EndGet
+    
+        BegSet
+            _FieldName = *PropVal
+        EndSet
+    EndProp
+    
+    DclFld _SortOrder Type( *Integer4 ) Inz(0) 
+    BegProp SortOrder Type( *Integer4 )  Access( *Public )
+        BegGet
+            LeaveSr Value( _SortOrder )
+        EndGet
+    
+        BegSet
+            _SortOrder = *PropVal
+        EndSet
+    EndProp
+   
+
+    BegConstructor Access( *Public ) 
+        DclSrParm FieldName  Type( *String ) 
+        DclSrParm SortOrder  Type( *Integer4 ) 
+        
+        *This.FieldName = FieldName
+        *This.SortOrder = SortOrder 
+    EndConstructor 
+
+EndClass
