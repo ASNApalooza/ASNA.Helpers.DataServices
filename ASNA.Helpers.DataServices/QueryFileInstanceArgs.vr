@@ -18,6 +18,8 @@ BegClass QueryFileInstanceArgs Access(*Public)
         DclFld EndingKeys           Type(List(*Of QueryField)) Access(*Public) New()      
         DclFld Query                Type(*String) Access(*Public)
         DclFld JsonError            Type(*String) Access(*Public) 
+        DclFld EncodedArgs          Type(*String) Access(*Public) 
+        DclFld MoreRowsForward      Type(*Boolean) Access(*Public) 
     EndClass
 
     BegClass InputArgs Access(*Public) 

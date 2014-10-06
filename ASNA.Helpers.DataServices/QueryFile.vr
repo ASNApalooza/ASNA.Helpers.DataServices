@@ -49,6 +49,10 @@ BegClass QueryFile Access(*Public)
         DclSrParm RecordsToRead Type(*Integer4) 
 
         *This.Args.Outputs.ResultRowCount = 0 
+
+        If (RecordsToRead = -1) 
+            RecordsToRead = 1000000
+        EndIf
        
         *This.DGFile = DataGateAPI.OpenDGFileForRead(*This.DGDB,*This.Args.Inputs.Library,*This.Args.Inputs.File)
 
@@ -56,7 +60,10 @@ BegClass QueryFile Access(*Public)
             ReadRowsWithSimpleQuery(RecordsToRead) 
         Else
             ReadRowsWithPagedQuery(RecordsToRead)
+            SetBeginningAndEndKeys(DGDS.Tables[0])
         EndIf 
+
+//        SetBeginningAndEndKeys(DGDS.Tables[0])
 
         DGFile.Close()
 
@@ -117,14 +124,18 @@ BegClass QueryFile Access(*Public)
             Key.Row[fk.FieldName] = fk.FieldValue 
         EndFor 
 
-        DGFile.SeekKey(SeekMode.Last, Key) 
-        EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
+//        DGFile.SeekKey(SeekMode.Last, Key) 
+//        EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
+//        If (EOF) 
+//            Throw *New System.ArgumentException("EOF: no records available for page query") 
+//        EndIf
 
         DGFile.SeekKey(SeekMode.SetGT, Key) 
 
         OutputAdapter.Header(DGDS.Tables[0])
         Do FromVal(1) ToVal(RecordsToRead) 
             EOF = DataGateAPI.ReadNextRecord(DGFile,DGDS)
+
             If (EOF) 
                 Leave
             EndIf
@@ -205,40 +216,138 @@ BegClass QueryFile Access(*Public)
         EndDo
     EndSr
 
-    BegSr SetdBeginningAndEndKeys
+    BegSr SetBeginningAndEndKeys
         DclSrParm dt Type(DataTable) 
 
-        DclFld dr  Type(DataRow)         
+        DclFld dr                Type(DataRow)         
+        DclFld JsonStartingKeys  Type(*String) 
+        DclFld JsonEndingKeys    Type(*String) 
+        DclFld EncodedKeys       Type(*String) 
 
         If (dt.Rows.Count > 0) 
             dr = dt.Rows[0]         
             ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryParms)
                 *This.Args.Outputs.StartingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
-            EndFor
+            EndFor            
+            JsonStartingKeys = JsonConvert.SerializeObject(*This.Args.Outputs.StartingKeys)     
+            EncodedKeys = DataGateAPI.Base64Encode(JsonStartingKeys)
+
             dr = dt.Rows[dt.Rows.Count-1] 
             ForEach key Type(QueryField) Collection(*This.Args.Inputs.QueryParms)
                 *This.Args.Outputs.EndingKeys.Add(*New QueryField(key.FieldName, dr[key.FieldName].ToString().Trim())) 
             EndFor
+            JsonEndingKeys = JsonConvert.SerializeObject(*This.Args.Outputs.EndingKeys)     
+            EncodedKeys = DataGateAPI.Base64Encode(JsonEndingKeys)
+
+            *This.Args.Outputs.MoreRowsForward = MoreRowsForward()
         EndIf 
     EndSr
 
+    BegFunc MoreRowsForward Type(*Boolean)
+        DclFld Key           Type(AdgKeyTable)
+        DclFld EOF           Type(*Boolean)
+
+        Key = DGDS.NewKeyTable(0)
+        ForEach fk Type(QueryField) Collection(*This.Args.Outputs.EndingKeys) 
+            Key.Row[fk.FieldName] = fk.FieldValue 
+        EndFor 
+
+        Try            
+            DGFile.SeekKey(SeekMode.SetGT, Key) 
+        Catch DgEx Type(dgException) 
+            If (DgEx.Error = dgErrorNumber.dgEaEOF)
+                EOF = *TRUE 
+            ElseIf (DgEx.Error = dgErrorNumber.dgEaNOTFND)
+                EOF = *TRUE
+            Else
+                Throw DgEx           
+            EndIf
+        EndTry    
+        LeaveSr NOT EOF
+    EndFunc         
+
+    BegSr SetEncodedArgs
+        DclFld Inputs  Type(*String) 
+        DclFld Outputs Type(*String)
+
+        If (String.IsNullOrEmpty(*This.Args.Inputs.Query)) 
+            Inputs = JsonConvert.SerializeObject(*This.Args.Inputs)
+            Outputs = JsonConvert.SerializeObject(*This.Args.Outputs)
+
+            DclFld i Type(*Integer4)
+            DclFld o Type(*Integer4)
+            i = INputs.LEngth 
+            o = Outputs.Length 
+
+            i = DataGateAPI.Base64Encode(Inputs).Length
+            o = DataGateAPI.Base64Encode(Outputs).Length  
+
+
+            *This.Args.Outputs.EncodedArgs = DataGateAPI.Base64Encode(Inputs) + "~" ++ 
+                                             DataGateAPI.Base64Encode(Outputs) 
+        Else 
+            *This.Args.Outputs.EncodedArgs = *Nothing
+        EndIf
+    EndSr
+
+    BegFunc NextPage Type(*Object) Access(*Public)
+        DclSrParm EncodedArgs   Type(*String) 
+
+        DclFld Base64InputArgs  Type(*String) 
+        DclFld Base64OutputArgs Type(*String)
+        DclFld InputArgsJson    Type(*String) 
+        DclFld OutputArgsJson   Type(*String)
+        DclFld Pos              Type(*Integer4)
+
+        Pos = EncodedArgs.IndexOf("~")
+        Base64InputArgs = EncodedArgs.Substring(0,Pos) 
+        Base64OutputArgs = EncodedArgs.Substring(Pos + 1) 
+
+        InputArgsJson = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(Base64InputArgs)
+        OutputArgsJson = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(Base64OutputArgs)
+
+        *This.Args.Inputs = JsonConvert.DeserializeObject(InputArgsJson, *TypeOf(ASNA.Helpers.DataServices.QueryFileInstanceArgs.InputArgs)) *As ASNA.Helpers.DataServices.QueryFileInstanceArgs.InputArgs
+        *This.Args.Outputs = JsonConvert.DeserializeObject(OutputArgsJson, *TypeOf(ASNA.Helpers.DataServices.QueryFileInstanceArgs.OutputArgs)) *As ASNA.Helpers.DataServices.QueryFileInstanceArgs.OutputArgs
+
+        *This.Args.Inputs.QueryParms.Clear()
+        ForEach qf Type(QueryField) Collection(*This.Args.Outputs.EndingKeys)
+            *This.Args.Inputs.QueryParms.Add(*New QueryField(qf.FieldName,qf.FieldValue)) 
+        EndFor
+        *This.Args.Inputs.Options.Clear()
+        *This.Args.Outputs.EndingKeys.Clear()
+        LeaveSr *This.Exec()
+    EndFunc 
+
+    BegFunc NextPage Type(*Object) Access(*Public)
+        If String.IsNullOrEmpty(*This.Args.Outputs.EncodedArgs) 
+            Throw *New System.ArgumentException("Persisted paging data not available... are you stateless?")
+        EndIf
+        LeaveSr *This.NextPage(*This.Args.Outputs.EncodedArgs) 
+    EndFunc 
+
+    BegSr ValidateInputs        
+        If (String.IsNullOrEmpty(*This.Args.Inputs.Query)) AND (*This.Args.Inputs.OrderBy.Count > 0 )
+            Throw *New System.ArgumentNullException("Paged queries cannot specify 'order by' columns.")
+        EndIf
+    EndSr
+
     BegFunc Exec Type(*Object) Access(*Public)
-        DclFld timer                Type(StopWatch) New()
+        DclFld timer Type(StopWatch) New()
 
         Try
             timer.Start()
+            ValidateInputs()
             If (String.IsNullOrEmpty(*This.Args.Inputs.Query)) 
                 *This.Args.Inputs.QueryType = ASNA.Helpers.DataServices.QueryType.Paged
             Else 
                 *This.Args.Inputs.QueryType = ASNA.Helpers.DataServices.QueryType.Simple 
             EndIf
             *This.GetQueryRows(*This.Args.Inputs.Rows) 
-            SetdBeginningAndEndKeys(DGDS.Tables[0])
+//            SetBeginningAndEndKeys(DGDS.Tables[0])
             timer.Stop()
-            //*This.Args.Outputs.ResultRowCount  = DGDS.Tables[0].Rows.Count 
-            //*This.Args.Outputs.ResultColCount  = DGDS.Tables[0].Columns.Count
             *This.Args.Outputs.Milliseconds    = timer.ElapsedMilliseconds
             OutputAdapter.Render(DGDS.Tables[0])
+            SetEncodedArgs()
 
         Catch DGExcept Type(dgException)
             *This.Args.Error.ErrorMessage = DGExcept.Message

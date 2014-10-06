@@ -21,8 +21,8 @@ Using System.Text.RegularExpressions
 
 BegClass Tests Access(*Public) Attributes(TestClass())
 
-    //DclConst DBName Value("*Public/CYPRESS") 
-    DclConst DBName Value("*Public/DG NET Local") 
+    DclConst DBName Value("*Public/CYPRESS") 
+    //DclConst DBName Value("*Public/DG NET Local") 
 
     DclFld db       Type(AdgConnection) Shared(*Yes)
 
@@ -98,13 +98,49 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         Query.Args.Inputs.Library      = "examples"
         Query.Args.Inputs.File         = "CmastNewL1"
         Query.Args.Inputs.FieldsList   = "*ALL"
-        //Query.Args.Inputs.FieldsList   = "CMCUSTNO,CMNAME,CMADDR1,CMCITY,CMSTATE,CMPOSTCODE"
         Query.Args.Inputs.Rows         = 12
-        //Query.Args.Inputs.QueryType    = ASNA.Helpers.DataServices.QueryType.Paged
         Query.Args.Inputs.QueryParms.Add(*New ASNA.Helpers.DataServices.QueryField("CMCUSTNO",0))
                 
         dt = Query.Exec() *As DataTable
         Assert.AreEqual(dt.Rows.Count, Query.Args.Inputs.Rows) 
+
+        DclFld InputJson   Type(*String) 
+        DclFld OutputJson  Type(*String)
+        DclFld InputJson2  Type(*String) 
+        DclFld OutputJson2 Type(*String)
+        DclFld InputNew    Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs.InputArgs) 
+        DclFld OutputNew   Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs.OutputArgs)
+        DclFld Pos         Type(*Integer4)
+        DclFld sw          Type(StopWatch) New()
+
+        sw.Start()
+
+        Pos = Query.Args.OutPuts.EncodedArgs.IndexOf("~")
+        InputJson = Query.Args.OutPuts.EncodedArgs.Substring(0,Pos) 
+        OutputJson = Query.Args.OutPuts.EncodedArgs.Substring(Pos + 1) 
+
+        InputJson2 = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(InputJson)
+        OutputJson2 = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(OutputJson)
+
+        DclFld t Type(System.Type)
+        t = *TypeOf(ASNA.Helpers.DataServices.QueryFileInstanceArgs.InputArgs)
+        InputJson = t.GetType().ToString() 
+
+        InputNew = JsonConvert.DeserializeObject(InputJson2, *TypeOf(ASNA.Helpers.DataServices.QueryFileInstanceArgs.InputArgs)) *As ASNA.Helpers.DataServices.QueryFileInstanceArgs.InputArgs
+        OutputNew = JsonConvert.DeserializeObject(OutputJson2, *TypeOf(ASNA.Helpers.DataServices.QueryFileInstanceArgs.OutputArgs)) *As ASNA.Helpers.DataServices.QueryFileInstanceArgs.OutputArgs
+
+        sw.Stop()
+
+        InputJson = JsonConvert.SerializeObject(dt,Formatting.Indented)
+        File.WriteAllText("c:\users\roger\documents\testing\Table-page-1.json",InputJson)
+
+        dt = Query.NextPage(Query.Args.Outputs.EncodedArgs) *As DataTable
+
+        InputJson = JsonConvert.SerializeObject(dt,Formatting.Indented)
+        File.WriteAllText("c:\users\roger\documents\testing\Table-page-2.json",InputJson)
+
+
+        InputJson = "x"
     EndSr 
 
     BegSr PagedQueryToDataTable2 Attributes(TestMethod()) Access(*Public)
@@ -130,7 +166,6 @@ BegClass Tests Access(*Public) Attributes(TestClass())
     BegSr PagedQueryToDataTable4 Attributes(TestMethod()) Access(*Public)
         DclFld Query         Type(ASNA.Helpers.DataServices.QueryDriver) New(db)
         DclFld dt            Type(DataTable)
-        DclFld ArgsJson      Type(*String) 
 
         Query.Args.Inputs.Library    = "examples"
         Query.Args.Inputs.File       = "CMastNewL2"

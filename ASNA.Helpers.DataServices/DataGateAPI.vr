@@ -17,6 +17,24 @@ EndEnum
 
 BegClass DataGateAPI Access(*Public)
 
+    BegFunc Base64Encode Type(*String) Access(*Public) Shared(*Yes)
+        DclSrParm PlainText Type(*String) 
+
+        DclArray plainTextBytes Type(*Byte) Rank(1)
+
+        plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText)
+        LeaveSr System.Convert.ToBase64String(plainTextBytes)
+    EndFunc 
+
+    BegFunc Base64Decode Type(*String) Access(*Public)  Shared(*Yes)
+        DclSrParm base64EncodedData Type(*String) 
+
+        DclArray base64EncodedBytes Type(*Byte) Rank(1)
+
+        base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData)
+        LeaveSr System.Text.Encoding.UTF8.GetString(base64EncodedBytes)
+    EndFunc 
+
     BegFunc ParseCommaDelimitedStringIntoArray Type(*String) Rank(1) Access(*Public) Shared(*Yes)
         DclSrParm FieldsString Type(*String) 
 
@@ -62,7 +80,7 @@ BegClass DataGateAPI Access(*Public)
         DclSrParm Usage      Type(ASNA.DataGate.Common.KeyUsages) Rank(1) By(*Reference) 
         DclSrParm QueryArgs  Type(ASNA.Helpers.DataServices.QueryFileInstanceArgs) 
 
-        DclFld qf Type(List(*Of QueryField))
+        //DclFld qf Type(List(*Of QueryField))
         DclFld i  Type(*Integer4) 
 
         // Generally DG Keys and Usage should be populated from the QueryArgs.Inputs.OrderBy collection.

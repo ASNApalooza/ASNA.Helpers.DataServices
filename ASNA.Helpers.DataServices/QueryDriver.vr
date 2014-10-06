@@ -26,4 +26,15 @@ BegClass QueryDriver Access(*Public)
     BegFunc Exec Type(*Object) Access(*Public) 
         LeaveSr *This.Query.Exec() 
     EndFunc 
+    
+    BegFunc NextPage Type(*Object) Access(*Public) 
+        DclSrParm EncodedArgs Type(*String) 
+
+        LeaveSr *This.Query.NextPage(EncodedArgs)
+    EndFunc 
+
+    BegFunc NextPage Type(*Object) Access(*Public) 
+
+        LeaveSr *This.Query.NextPage()
+    EndFunc 
 EndClass

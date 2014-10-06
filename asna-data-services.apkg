@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<package name="asna-data-services" location="https://github.com/ASNA/Walter/blob/master/ASNA.Helpers.DataServices">     
+    <files>
+        <file fileName="/ASNA.Helpers.DataServices.dll" sourceFolder="/bin/Debug" targetFolder="\bin"></file>
+        <file fileName="/ClosedXML.dll" sourceFolder="/bin/Debug" targetFolder="\bin"></file>
+        <file fileName="/ClosedXML.xml" sourceFolder="/bin/Debug" targetFolder="\bin"></file>
+        <file fileName="/DocumentFormat.OpenXml.dll" sourceFolder="/bin/Debug" targetFolder="\bin"></file>
+        <file fileName="/Newtonsoft.Json.dll" sourceFolder="/bin/Debug" targetFolder="\bin"></file>
+        <file fileName="/Newtonsoft.Json.xml" sourceFolder="/bin/Debug" targetFolder="\bin"></file>
+    </files>    
+
+    <appSettings>
+        <add key="ActiveDBName" value="Cypress" />
+        <add key="Local"        value="*Public/DG NET Local" />
+        <add key="Cypress"      value="*Public/Cypress" />
+    </appSettings>
+
+</package>

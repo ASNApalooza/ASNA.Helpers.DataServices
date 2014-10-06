@@ -35,9 +35,7 @@ BegClass ToDataTableAdapter Implements(iQueryFileAdapter)  Access(*Public)
     BegSr Render Implements(iQueryFileAdapter.Render) Access(*Public)
         DclSrParm dt Type(DataTable)
 
-        If (Result = *Nothing)
-            _Result = dt
-        EndIf
+        _Result = dt
     EndSr
 EndClass
 
