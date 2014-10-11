@@ -114,6 +114,7 @@ BegClass QueryFile Access(*Public)
 
         *This.DGDS = *Nothing
         *This.DGFile.OpenNewAdgDataSet(*ByRef DGDS)
+        *This.Args.Outputs.TotalRecordCount = DGFile.RecordCount
         CheckForFetchingAllColumns(DGDS.Tables[0])
         CheckFieldsListAgainstRecord(DGDS.Tables[0])
         DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)
@@ -166,6 +167,7 @@ BegClass QueryFile Access(*Public)
         EOF = *False    
         Counter = 0 
         DGFile.OpenSimpleQuery(*ByRef DGDS,"*UNIQUE",Query,Keys,Usage)
+        *This.Args.Outputs.TotalRecordCount = DGFile.RecordCount
         CheckForFetchingAllColumns(DGDS.Tables[0])
         CheckFieldsListAgainstRecord(DGDS.Tables[0])
         DataGateAPI.DeleteColumnsFromDataTable(DGDS.Tables[0],*This.Args)

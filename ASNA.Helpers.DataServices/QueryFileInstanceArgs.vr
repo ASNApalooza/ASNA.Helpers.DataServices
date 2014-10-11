@@ -20,6 +20,7 @@ BegClass QueryFileInstanceArgs Access(*Public)
         DclFld JsonError            Type(*String) Access(*Public) 
         DclFld EncodedArgs          Type(*String) Access(*Public) 
         DclFld MoreRowsForward      Type(*Boolean) Access(*Public) 
+        DclFld TotalRecordCount     Type(*Integer4) Access(*Public) 
     EndClass
 
     BegClass InputArgs Access(*Public) 
