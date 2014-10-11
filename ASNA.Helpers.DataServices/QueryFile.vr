@@ -63,6 +63,8 @@ BegClass QueryFile Access(*Public)
             SetBeginningAndEndKeys(DGDS.Tables[0])
         EndIf 
 
+        SetRecordCountPhrase()
+
 //        SetBeginningAndEndKeys(DGDS.Tables[0])
 
         DGFile.Close()
@@ -290,6 +292,12 @@ BegClass QueryFile Access(*Public)
         Else 
             *This.Args.Outputs.EncodedArgs = *Nothing
         EndIf
+    EndSr
+
+    BegSr SetRecordCountPhrase
+        *This.Args.Outputs.RecordCountPhrase =  String.Format("{0:#,##0} of ~{1:#,##0}", +
+                                                      *This.Args.Outputs.ResultRowCount, +
+                                                      *This.Args.Outputs.TotalRecordCount) 
     EndSr
 
     BegFunc NextPage Type(*Object) Access(*Public)

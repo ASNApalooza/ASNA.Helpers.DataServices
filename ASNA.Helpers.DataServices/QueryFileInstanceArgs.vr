@@ -21,6 +21,7 @@ BegClass QueryFileInstanceArgs Access(*Public)
         DclFld EncodedArgs          Type(*String) Access(*Public) 
         DclFld MoreRowsForward      Type(*Boolean) Access(*Public) 
         DclFld TotalRecordCount     Type(*Integer4) Access(*Public) 
+        DclFld RecordCountPhrase    Type(*String) Access(*Public) 
     EndClass
 
     BegClass InputArgs Access(*Public) 
