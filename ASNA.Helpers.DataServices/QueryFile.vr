@@ -49,6 +49,8 @@ BegClass QueryFile Access(*Public)
         DclSrParm RecordsToRead Type(*Integer4) 
 
         *This.Args.Outputs.ResultRowCount = 0 
+        *This.Args.Outputs.StartingKeys.Clear()
+        *This.Args.Outputs.EndingKeys.Clear()
 
         If (RecordsToRead = -1) 
             RecordsToRead = 1000000
