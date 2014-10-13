@@ -118,6 +118,7 @@ BegClass DataGateAPI Access(*Public)
             // This code assumes the database name label property isn't "DB2" for non-IBM i databases.
             Result = Regex.Replace(Query,"\s/*AND\s*", " *AND ",RegexOptions.IgnoreCase)
             Result = Regex.Replace(Result,"\s/*OR\s*", " *OR ",RegexOptions.IgnoreCase)
+            Result = Regex.Replace(Result,"\s/*CT\s*", " *CT ",RegexOptions.IgnoreCase)
 //            Result = Query.Replace(" AND "," *AND ") 
  //           Result = Result.Replace(" OR "," *OR ") 
         EndIf 
