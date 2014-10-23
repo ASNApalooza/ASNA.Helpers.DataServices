@@ -341,6 +341,11 @@ BegClass QueryFile Access(*Public)
         If (String.IsNullOrEmpty(*This.Args.Inputs.Query)) AND (*This.Args.Inputs.OrderBy.Count > 0 )
             Throw *New System.ArgumentNullException("Paged queries cannot specify 'order by' columns.")
         EndIf
+
+        ForEach qf Type(QueryField) Collection(*This.Args.Inputs.QueryParms)
+            // Put validation here.
+
+        EndFor 
     EndSr
 
     BegFunc Exec Type(*Object) Access(*Public)
