@@ -115,9 +115,9 @@ BegClass Tests Access(*Public) Attributes(TestClass())
 
         sw.Start()
 
-        Pos = Query.Args.OutPuts.EncodedArgs.IndexOf("~")
-        InputJson = Query.Args.OutPuts.EncodedArgs.Substring(0,Pos) 
-        OutputJson = Query.Args.OutPuts.EncodedArgs.Substring(Pos + 1) 
+        Pos = Query.Args.OutPuts.QueryState.IndexOf("~")
+        InputJson = Query.Args.OutPuts.QueryState.Substring(0,Pos) 
+        OutputJson = Query.Args.OutPuts.QueryState.Substring(Pos + 1) 
 
         InputJson2 = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(InputJson)
         OutputJson2 = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(OutputJson)
@@ -134,7 +134,7 @@ BegClass Tests Access(*Public) Attributes(TestClass())
         InputJson = JsonConvert.SerializeObject(dt,Formatting.Indented)
         File.WriteAllText("c:\users\roger\documents\testing\Table-page-1.json",InputJson)
 
-        dt = Query.NextPage(Query.Args.Outputs.EncodedArgs) *As DataTable
+        dt = Query.NextPage(Query.Args.Outputs.QueryState) *As DataTable
 
         InputJson = JsonConvert.SerializeObject(dt,Formatting.Indented)
         File.WriteAllText("c:\users\roger\documents\testing\Table-page-2.json",InputJson)

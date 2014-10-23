@@ -272,7 +272,7 @@ BegClass QueryFile Access(*Public)
         LeaveSr NOT EOF
     EndFunc         
 
-    BegSr SetEncodedArgs
+    BegSr SetQueryState 
         DclFld Inputs  Type(*String) 
         DclFld Outputs Type(*String)
 
@@ -280,19 +280,10 @@ BegClass QueryFile Access(*Public)
             Inputs = JsonConvert.SerializeObject(*This.Args.Inputs)
             Outputs = JsonConvert.SerializeObject(*This.Args.Outputs)
 
-            DclFld i Type(*Integer4)
-            DclFld o Type(*Integer4)
-            i = INputs.LEngth 
-            o = Outputs.Length 
-
-            i = DataGateAPI.Base64Encode(Inputs).Length
-            o = DataGateAPI.Base64Encode(Outputs).Length  
-
-
-            *This.Args.Outputs.EncodedArgs = DataGateAPI.Base64Encode(Inputs) + "~" ++ 
+            *This.Args.Outputs.QueryState = DataGateAPI.Base64Encode(Inputs) + "~" ++ 
                                              DataGateAPI.Base64Encode(Outputs) 
         Else 
-            *This.Args.Outputs.EncodedArgs = *Nothing
+            *This.Args.Outputs.QueryState = *Nothing
         EndIf
     EndSr
 
@@ -303,7 +294,7 @@ BegClass QueryFile Access(*Public)
     EndSr
 
     BegFunc NextPage Type(*Object) Access(*Public)
-        DclSrParm EncodedArgs   Type(*String) 
+        DclSrParm QueryState   Type(*String) 
 
         DclFld Base64InputArgs  Type(*String) 
         DclFld Base64OutputArgs Type(*String)
@@ -311,9 +302,9 @@ BegClass QueryFile Access(*Public)
         DclFld OutputArgsJson   Type(*String)
         DclFld Pos              Type(*Integer4)
 
-        Pos = EncodedArgs.IndexOf("~")
-        Base64InputArgs = EncodedArgs.Substring(0,Pos) 
-        Base64OutputArgs = EncodedArgs.Substring(Pos + 1) 
+        Pos = QueryState.IndexOf("~")
+        Base64InputArgs = QueryState.Substring(0,Pos) 
+        Base64OutputArgs = QueryState.Substring(Pos + 1) 
 
         InputArgsJson = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(Base64InputArgs)
         OutputArgsJson = ASNA.Helpers.DataServices.DataGateAPI.Base64Decode(Base64OutputArgs)
@@ -331,10 +322,10 @@ BegClass QueryFile Access(*Public)
     EndFunc 
 
     BegFunc NextPage Type(*Object) Access(*Public)
-        If String.IsNullOrEmpty(*This.Args.Outputs.EncodedArgs) 
+        If String.IsNullOrEmpty(*This.Args.Outputs.QueryState) 
             Throw *New System.ArgumentException("Persisted paging data not available... are you stateless?")
         EndIf
-        LeaveSr *This.NextPage(*This.Args.Outputs.EncodedArgs) 
+        LeaveSr *This.NextPage(*This.Args.Outputs.QueryState) 
     EndFunc 
 
     BegSr ValidateInputs        
@@ -360,11 +351,10 @@ BegClass QueryFile Access(*Public)
                 *This.Args.Inputs.QueryType = ASNA.Helpers.DataServices.QueryType.Simple 
             EndIf
             *This.GetQueryRows(*This.Args.Inputs.Rows) 
-//            SetBeginningAndEndKeys(DGDS.Tables[0])
             timer.Stop()
             *This.Args.Outputs.Milliseconds    = timer.ElapsedMilliseconds
             OutputAdapter.Render(DGDS.Tables[0])
-            SetEncodedArgs()
+            SetQueryState()
 
         Catch DGExcept Type(dgException)
             *This.Args.Error.ErrorMessage = DGExcept.Message
