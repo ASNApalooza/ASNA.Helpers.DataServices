@@ -11,3 +11,10 @@ C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.Data
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.vrprojResolveAssemblyReference.cache
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\System.Web.dll
 C:\rpDocuments\Programming\AVR\Other\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\System.Web.xml
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\ASNA.Helpers.DataServices.dll
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\ASNA.Helpers.DataServices.pdb
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\ClosedXML.dll
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\ClosedXML.xml
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\Newtonsoft.Json.xml
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.dll
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.pdb
