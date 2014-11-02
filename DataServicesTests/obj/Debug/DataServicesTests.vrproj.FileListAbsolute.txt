@@ -15,7 +15,6 @@ C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\bi
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ClosedXML.dll
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ASNA.Helpers.DataServices.pdb
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\ClosedXML.xml
-C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\bin\Debug\Newtonsoft.Json.xml
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\obj\Debug\DataServicesTests.vrprojResolveAssemblyReference.cache
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\obj\Debug\DataServicesTests.dll
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\DataServicesTests\obj\Debug\DataServicesTests.pdb

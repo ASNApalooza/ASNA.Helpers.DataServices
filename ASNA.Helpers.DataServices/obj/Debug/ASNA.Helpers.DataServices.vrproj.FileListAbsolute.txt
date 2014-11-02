@@ -18,3 +18,4 @@ C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataSer
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\bin\Debug\Newtonsoft.Json.xml
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.dll
 C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.pdb
+C:\rpDocuments\Programming\Walter\ASNA.Helpers.DataServices\ASNA.Helpers.DataServices\obj\Debug\ASNA.Helpers.DataServices.vrprojResolveAssemblyReference.cache

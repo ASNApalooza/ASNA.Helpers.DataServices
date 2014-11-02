@@ -161,11 +161,11 @@ BegClass QueryFile Access(*Public)
         DclArray Keys        Type(*String) Rank(1)
         DclArray Usage       Type(ASNA.DataGate.Common.KeyUsages) Rank(1)
 
-        QueryMask.Append(CheckQueryArgs(*This.Args.Inputs.Query)) 
+        QueryMask.Append(CheckQueryArgs(*This.Args.Inputs.Query).ToUpper()) 
         CreateQueryDefinition(QueryMask)                 
         DataGateAPI.PopulateDGKeysAndUsage(*ByRef Keys,*ByRef Usage,*This.Args)
         
-        Query = QueryMask.ToString() 
+        Query = QueryMask.ToString()
         Query = DataGateAPI.SetCorrectAndOrInQuery(Query,DGDB.SourceProfile.Label)
 
         EOF = *False    
