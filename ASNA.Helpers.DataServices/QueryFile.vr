@@ -333,6 +333,14 @@ BegClass QueryFile Access(*Public)
             Throw *New System.ArgumentNullException("Paged queries cannot specify 'order by' columns.")
         EndIf
 
+        If (*This.Args.Inputs.Rows = 0) 
+            Throw *New System.ArgumentNullException("Query rows cannot be zero.")
+        EndIf 
+
+        If (*This.DGDB = *Nothing) or (*This.DGDB.State <> ConnectionState.Open)
+            Throw *New System.ArgumentNullException("DB not instanced or not connected.") 
+        EndIf
+
         ForEach qf Type(QueryField) Collection(*This.Args.Inputs.QueryParms)
             // Put validation here.
 
